@@ -186,12 +186,17 @@ def generar_manifiesto(directorio: Path, salida: Path) -> dict[str, str]:
     # TODO 1: implementar el recorrido y la construcción del manifiesto.
     #         Borrá el `raise` de abajo y escribí tu código.
     # ----------------------------------------------------------------------
-    raise NotImplementedError(
-        "TODO 1 de 4 — generar_manifiesto() sin implementar.\n"
-        "  Qué falta: recorrer el directorio recursivamente y devolver el\n"
-        "  diccionario {ruta_relativa_posix: digest_sha256}, ordenado por clave.\n"
-        "  Leé el docstring de esta función: están los requisitos y las pistas."
-    )
+    
+    manifiesto = {}
+    ruta_salida = salida.resolve()
+    for ruta in directorio.rglob("*"):
+        if not ruta.is_file():
+            continue
+        if ruta.resolve() == ruta_salida:
+            continue
+        clave = ruta.relative_to(directorio).as_posix()
+        manifiesto[clave] = sha256_archivo(ruta)
+    return {clave: manifiesto[clave] for clave in sorted(manifiesto)}
 
 
 # ==========================================================================
