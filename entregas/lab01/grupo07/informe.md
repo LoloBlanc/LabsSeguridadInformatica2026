@@ -14,23 +14,19 @@
 
 | | |
 |---|---|
-| **Grupo** | |
-| **Caso asignado (Parte A)** | |
-| **Tema del mini-research** | |
-| **Fecha de entrega** | |
+| **Grupo** | 07 |
+| **Caso asignado (Parte A)** | *(a completar por Lautaro)* |
+| **Tema del mini-research** | *(a completar por Fernando)* |
+| **Fecha de entrega** | *(antes del inicio de la Clase 2)* |
 
 ### Integrantes
 
-*Esta tabla también va en `INTEGRANTES.md`. Solo nombre, legajo y usuario de
-GitHub. Nada de DNI, teléfono ni dirección: el repositorio es público.*
-
 | Nombre y apellido | Legajo | Usuario de GitHub |
 |---|---|---|
-| | | @ |
-| | | @ |
-| | | @ |
-| | | @ |
-| | | @ |
+| Lorenzo Blanc | 15034 | @LoloBlanc |
+| Fernando Cagliero | 15136 | @Ferca19 |
+| Guadalupe Gómez | 15397 | @guadagomezgg8 |
+| Lautaro Mariño | 15163 | @lautaromarino0 |
 
 ---
 
@@ -149,43 +145,115 @@ entrada de blog).*
 
 ## B.1 — Evidencia de ejecución
 
-*Pegá la salida real de cada comando. No la transcribas a mano: copiala tal
-cual sale de la terminal.*
-
 ### Generación del manifiesto
 
 ```
-$ python3 src/integridad.py generar --dir data/muestra --salida manifest.sha256
+$ python src/integridad.py generar --dir data/muestra --salida manifest.sha256
+Manifiesto generado: manifest.sha256
+Directorio base:     data\muestra
+Archivos indexados:  4
 
-(pegar salida)
+$ cat manifest.sha256
+{
+  "app.bin": "a1f259d4365ed4320c377ce26f5c8c56dcdc9a89e7b641bfd8eabfbbeac86654",
+  "logs/acceso.log": "479bb8382eca943570ac69b7189e4feb62d152436f77cafcf551c52ea00c5cd4",
+  "politica_seguridad.md": "4f27c493a553b185aebdea570d0cc4aa5763425de0fc91d51a32eb71a4c46393",
+  "transferencia.txt": "4394e0a7006eecb79b32dbfa7471fd7121893239fb94e1a7a3269c31b5262334"
+}
+```
+
+Exclusión del propio manifiesto. Dos corridas seguidas escribiendo la salida
+dentro del directorio recorrido: en la segunda el archivo ya existe y aun así
+queda fuera del índice.
+
+```
+$ python src/integridad.py generar --dir data/muestra --salida data/muestra/manifest.sha256
+Manifiesto generado: data\muestra\manifest.sha256
+Directorio base:     data\muestra
+Archivos indexados:  4
+
+$ python src/integridad.py generar --dir data/muestra --salida data/muestra/manifest.sha256
+Manifiesto generado: data\muestra\manifest.sha256
+Directorio base:     data\muestra
+Archivos indexados:  4
+```
+
+Directorio vacío.
+
+```
+$ mkdir data/vacio
+$ python src/integridad.py generar --dir data/vacio --salida prueba_vacio.json
+Manifiesto generado: prueba_vacio.json
+Directorio base:     data\vacio
+Archivos indexados:  0
+
+$ cat prueba_vacio.json
+{}
 ```
 
 ### Verificación sobre un directorio íntegro
 
 ```
-$ python3 src/integridad.py verificar --dir data/muestra --manifiesto manifest.sha256
-$ echo "código de salida: $?"
+$ python src/integridad.py verificar --dir data/muestra --manifiesto manifest.sha256
+Directorio:  data\muestra
+Manifiesto:  manifest.sha256
 
-(pegar salida)
+  OK             4
+  MODIFICADO     0
+  FALTANTE       0
+  NUEVO          0
+
+INTEGRIDAD VERIFICADA — sin diferencias contra el manifiesto.
+
+$ echo "código de salida: $?"
+código de salida: 0
 ```
 
 ### Detección de la modificación de un byte
 
-*Esta prueba es obligatoria y tiene una penalización específica en la rúbrica
-si falla.*
-
 ```
 $ printf 'X' >> data/muestra/transferencia.txt
-$ python3 src/integridad.py verificar --dir data/muestra --manifiesto manifest.sha256
-$ echo "código de salida: $?"
+$ python src/integridad.py verificar --dir data/muestra --manifiesto manifest.sha256
+Directorio:  data\muestra
+Manifiesto:  manifest.sha256
 
-(pegar salida — debe reportar MODIFICADO y salir con 1)
+  OK             3
+  MODIFICADO     1
+  FALTANTE       0
+  NUEVO          0
+
+Hallazgos:
+  [MODIFICADO] transferencia.txt
+
+INTEGRIDAD COMPROMETIDA — 1 hallazgo(s).
+
+$ echo "código de salida: $?"
+código de salida: 1
 ```
 
 ### Detección de archivo faltante y de archivo nuevo
 
 ```
-(pegar los comandos que usaron y la salida)
+$ rm data/muestra/politica_seguridad.md
+$ echo "backdoor" > data/muestra/backdoor.sh
+$ python src/integridad.py verificar --dir data/muestra --manifiesto manifest.sha256
+Directorio:  data\muestra
+Manifiesto:  manifest.sha256
+
+  OK             2
+  MODIFICADO     1
+  FALTANTE       1
+  NUEVO          1
+
+Hallazgos:
+  [MODIFICADO] transferencia.txt
+  [FALTANTE] politica_seguridad.md
+  [NUEVO] backdoor.sh
+
+INTEGRIDAD COMPROMETIDA — 3 hallazgo(s).
+
+$ echo "código de salida: $?"
+código de salida: 1
 ```
 
 ### Efecto avalancha
@@ -226,6 +294,11 @@ está vacío. Una o dos oraciones por decisión.*
 
 | Decisión | Qué hicimos | Por qué |
 |---|---|---|
+| Recorrido de directorios | Usamos `rglob("*")` para recorrer el directorio de forma recursiva y procesamos únicamente los elementos que son archivos mediante `is_file()`. | Para incluir los archivos que se encuentran dentro de subdirectorios y evitar intentar calcular hashes sobre directorios. |
+| Exclusión del manifiesto | Comparamos cada archivo recorrido con la ruta de salida del manifiesto usando `resolve()`, y si coinciden lo excluimos. `resolve()` normaliza ambas rutas a una forma absoluta para compararlas de manera confiable, ya que una proviene del argumento de la CLI y la otra es construida por `rglob()`. | El manifiesto no debe incluirse a sí mismo porque al escribirlo su contenido cambia y, por lo tanto, también cambiaría su propio hash. |
+| Representación de las rutas | Usamos `relative_to(directorio)` para guardar rutas relativas y `as_posix()` para utilizar siempre `/` como separador. | Sin `as_posix()`, en Windows una ruta podía quedar como `logs\acceso.log`, y esa clave con barra invertida no sería compatible al verificar el manifiesto en Linux. |
+| Orden de las entradas | Ordenamos alfabéticamente las claves del manifiesto y las listas obtenidas durante la verificación. | Para que los resultados sean deterministas y evitar diferencias de orden innecesarias al comparar ejecuciones o manifiestos. |
+| Clasificación durante la verificación | Comparamos los archivos presentes en disco con los registrados en el manifiesto y, cuando una ruta está en ambos, comparamos sus hashes para clasificarlos como OK o MODIFICADO. Las diferencias de conjuntos permiten detectar los FALTANTE y NUEVO. | De esta forma la verificación detecta no solo archivos modificados, sino también archivos eliminados o agregados. |
 | | | |
 | | | |
 
@@ -304,7 +377,7 @@ lee y suma. No es relleno: es donde se ve si entendieron el problema.*
 
 | Integrante | Aportes |
 |---|---|
-| | |
+| Guadalupe Gómez | Estructura inicial del directorio del grupo. Implementación de `generar_manifiesto()` y `verificar_manifiesto()` (TODO 1 y 2). Pruebas de ejecución y evidencia de la sección B.1. Sección B.2. `INTEGRANTES.md`. |
 | | |
 | | |
 | | |
@@ -318,13 +391,13 @@ lee y suma. No es relleno: es donde se ve si entendieron el problema.*
 > que entiendan lo que entregan. La omisión de esta declaración es **causal de
 > rechazo automático** de la entrega. Una declaración honesta no baja la nota.
 
-**¿El grupo usó asistentes de IA en este trabajo?**  Sí / No
+**¿El grupo usó asistentes de IA en este trabajo?**  Sí 
 
 *Si la respuesta es No, firmen igual la sección y pasen al final.*
 
 | Herramienta | Para qué se usó | Qué partes del entregable afectó | Cómo se verificó que lo devuelto era correcto |
 |---|---|---|---|
-| | | | |
+| Claude (Anthropic) | Explicación de funciones de `pathlib` (`rglob`, `is_file`, `relative_to`, `as_posix`, `resolve`) y guía para implementar los TODO 1 y 2. Formateo de las salidas de terminal para la sección B.1. | `src/integridad.py`: funciones `generar_manifiesto()` y `verificar_manifiesto()`. Sección B.1 del informe. | El código se escribió y se probó de forma incremental: cada paso se ejecutó en la terminal antes de agregar el siguiente. Se verificaron los casos de directorio íntegro, modificación de un byte, archivo faltante, archivo nuevo, directorio vacío y manifiesto dentro del directorio recorrido. Las salidas pegadas en B.1 son reales. |
 | | | | |
 
 **Declaración:**
