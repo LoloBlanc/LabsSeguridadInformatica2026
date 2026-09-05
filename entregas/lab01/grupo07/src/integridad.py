@@ -261,12 +261,28 @@ def verificar_manifiesto(
     # TODO 2: implementar la clasificación en OK / MODIFICADO / FALTANTE / NUEVO.
     #         Borrá el `raise` de abajo y escribí tu código.
     # ----------------------------------------------------------------------
-    raise NotImplementedError(
-        "TODO 2 de 4 — verificar_manifiesto() sin implementar.\n"
-        "  Qué falta: comparar el directorio contra el manifiesto y devolver\n"
-        "  el diccionario con las cuatro categorías OK/MODIFICADO/FALTANTE/NUEVO.\n"
-        "  Leé el docstring de esta función: está la estructura exacta esperada."
-    )
+    en_disco = {}
+    ruta_salida = ruta_manifiesto.resolve()
+    for ruta in directorio.rglob("*"):
+        if not ruta.is_file():
+            continue
+        if ruta.resolve() == ruta_salida:
+            continue
+        clave = ruta.relative_to(directorio).as_posix()
+        en_disco[clave] = sha256_archivo(ruta)
+    ok = []
+    modificado = []
+    for clave in en_disco.keys() & manifiesto.keys():
+        if en_disco[clave] == manifiesto[clave]:
+            ok.append(clave)
+        else:
+            modificado.append(clave)
+    return {
+        ESTADO_OK: sorted(ok),
+        ESTADO_MODIFICADO: sorted(modificado),
+        ESTADO_FALTANTE: sorted(set(manifiesto.keys()) - set(en_disco.keys())),
+        ESTADO_NUEVO: sorted(set(en_disco.keys()) - set(manifiesto.keys())),
+    }
 
 
 # ==========================================================================
