@@ -394,7 +394,33 @@ sean aceptables, o ninguno? Fundamentá con al menos una fuente.*
 
 **Respuesta:**
 
+La propiedad criptográfica que se rompió es la resistencia a colisiones: ya no
+es computacionalmente inviable encontrar dos entradas diferentes que produzcan
+el mismo digest. En MD5 se demostraron colisiones prácticas desde 2004, y en
+SHA-1 se consiguió una colisión pública en 2017. Esto no significa que se haya
+recuperado cualquier mensaje a partir de su hash ni que se haya roto de la misma
+forma la resistencia a preimagen; el problema central es que un atacante puede
+fabricar dos contenidos distintos con la misma huella y aprovecharlo, por
+ejemplo, en una firma o certificado.
+
+Por ese motivo no deben usarse MD5 ni SHA-1 para generar nuevas firmas,
+certificados o controles de integridad frente a un atacante. MD5 puede seguir
+apareciendo como checksum no criptográfico o para detectar errores accidentales
+cuando no existe un adversario, pero ese uso no brinda seguridad. SHA-1 conserva
+algunos usos de compatibilidad, como verificar firmas antiguas ya existentes o
+ciertos usos aprobados de legado, pero no debe generar nueva protección
+criptográfica; para desarrollos nuevos corresponde migrar a SHA-256 o SHA-3.
+
 **Fuente:**
+
+NIST. (2006). *Cryptographic hash standards: Where do we go from here?*
+https://www.nist.gov/publications/cryptographic-hash-standards-where-do-we-go-here
+
+NIST. (2017). *Research results on SHA-1 collisions*.
+https://csrc.nist.gov/News/2017/Research-Results-on-SHA-1-Collisions
+
+NIST. (2022). *NIST transitioning away from SHA-1 for all applications*.
+https://csrc.nist.gov/News/2022/nist-transitioning-away-from-sha-1-for-all-apps
 
 ---
 
@@ -427,6 +453,22 @@ una mala elección para almacenar contraseñas? ¿Qué se usa en su lugar y qué
 propiedad tienen esas funciones que SHA-256 no tiene?*
 
 **Respuesta:**
+
+SHA-256 es sólida como función de hash general, pero justamente es demasiado
+rápida para almacenar contraseñas. Si un atacante obtiene la base de datos,
+puede probar enormes cantidades de candidatos por segundo en forma offline y
+comparar cada SHA-256 con el valor guardado. Además, SHA-256 no incorpora por sí
+misma una sal única ni un costo configurable; reutilizarla directamente permite
+precomputación y hace visibles las contraseñas repetidas entre usuarios.
+
+Para contraseñas se usan funciones diseñadas para ser lentas y costosas, como
+Argon2id, scrypt o bcrypt. Deben emplear una sal aleatoria y diferente por
+contraseña, y ajustar un factor de trabajo que haga cada intento más caro. Las
+funciones modernas agregan además resistencia al paralelismo mediante consumo de
+memoria configurable, algo que SHA-256 no ofrece. OWASP recomienda preferir
+Argon2id, usar scrypt cuando no esté disponible y reservar bcrypt principalmente
+para sistemas heredados. Así, una filtración sigue siendo grave, pero el costo
+de probar millones de candidatos aumenta considerablemente.
 
 ---
 
@@ -467,7 +509,7 @@ lee y suma. No es relleno: es donde se ve si entendieron el problema.*
 | Herramienta | Para qué se usó | Qué partes del entregable afectó | Cómo se verificó que lo devuelto era correcto |
 |---|---|---|---|
 | Claude (Anthropic) | Explicación de funciones de `pathlib` (`rglob`, `is_file`, `relative_to`, `as_posix`, `resolve`) y guía para implementar los TODO 1 y 2. Formateo de las salidas de terminal para la sección B.1. | `src/integridad.py`: funciones `generar_manifiesto()` y `verificar_manifiesto()`. Sección B.1 del informe. | El código se escribió y se probó de forma incremental: cada paso se ejecutó en la terminal antes de agregar el siguiente. Se verificaron los casos de directorio íntegro, modificación de un byte, archivo faltante, archivo nuevo, directorio vacío y manifiesto dentro del directorio recorrido. Las salidas pegadas en B.1 son reales. |
-| OpenAI Codex | Explicación conceptual, implementación y depuración de los TODO 3 y 4, y revisión de las respuestas de análisis. | `src/integridad.py`: `distancia_hamming_bits()` y `calcular_mac()`; evidencia B.1; respuestas P1, P2 y P4. | Se verificó con pruebas directas de casos idénticos, bits opuestos, longitudes inválidas, HMAC válido e inválido, ejecución de la CLI, `py_compile` y `git diff --check`. |
+| OpenAI Codex | Explicación conceptual, implementación y depuración de los TODO 3 y 4; revisión de respuestas de análisis; apoyo para P3 y P5. | `src/integridad.py`: `distancia_hamming_bits()` y `calcular_mac()`; evidencia B.1; respuestas P1, P2, P3, P4 y P5. | Se verificó con pruebas directas de casos idénticos, bits opuestos, longitudes inválidas, HMAC válido e inválido, ejecución de la CLI, consulta de fuentes originales, `py_compile` y `git diff --check`. |
 
 **Declaración:**
 
@@ -482,6 +524,9 @@ independientemente de la asistencia recibida.*
 *Todas las fuentes del trabajo, en formato APA. Las de la Parte A pueden
 repetirse acá o referenciarse a la sección A.6.*
 
-1.
-2.
-3.
+1. NIST. (2006). *Cryptographic hash standards: Where do we go from here?*
+   https://www.nist.gov/publications/cryptographic-hash-standards-where-do-we-go-here
+2. NIST. (2017). *Research results on SHA-1 collisions*.
+   https://csrc.nist.gov/News/2017/Research-Results-on-SHA-1-Collisions
+3. OWASP Foundation. (s. f.). *Password storage cheat sheet*.
+   https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
