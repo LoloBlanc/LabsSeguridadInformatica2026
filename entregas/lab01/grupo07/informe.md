@@ -342,6 +342,22 @@ que ese ataque no funcione?*
 
 **Respuesta:**
 
+El manifiesto por sí solo no establece una raíz de confianza. Si un atacante
+puede escribir tanto los archivos protegidos como `manifest.sha256`, puede
+modificar un archivo, calcular su nuevo SHA-256 y reemplazar el manifiesto.
+La verificación volvería a informar `OK`, pero solo porque el atacante cambió
+la referencia junto con el archivo.
+
+El esquema debe guardar la referencia en un lugar que el atacante no pueda
+modificar, por ejemplo un repositorio o servidor separado con permisos de solo
+lectura, o protegerla criptográficamente. Una alternativa es calcular un
+HMAC del manifiesto con una clave almacenada fuera del directorio controlado;
+una opción más adecuada cuando se necesita verificar el origen y conservar una
+prueba independiente es firmarlo digitalmente con una clave privada y validar
+la firma con la clave pública. En ambos casos, el atacante puede modificar el
+archivo, pero no puede generar una referencia válida sin el secreto o la clave
+privada.
+
 ---
 
 ### 2. Qué agrega HMAC y qué no
@@ -351,6 +367,22 @@ parte importante: ¿qué **no** resuelve HMAC? Pensá en el no repudio y en
 quién conoce la clave.*
 
 **Respuesta:**
+
+HMAC agrega autenticidad del origen además de integridad frente a quien no
+conoce la clave secreta. Un hash simple permite detectar cambios solo si el
+atacante no puede modificar también el hash, porque cualquiera que conozca el
+mensaje puede recalcular su digest. En cambio, un tag HMAC válido solo puede
+producirse con la clave compartida, por lo que el receptor puede comprobar que
+el mensaje no fue alterado por alguien externo al grupo que conoce la clave.
+
+HMAC no cifra el mensaje ni protege su confidencialidad, y tampoco garantiza
+disponibilidad o que el mensaje sea reciente: para evitar repeticiones habría
+que incorporar un nonce, contador o marca temporal y validarlo. Además, no
+proporciona no repudio, porque tanto quien genera como quien verifica conocen
+la misma clave y cualquiera de ellos podría crear un tag válido. Si la clave
+se filtra, el atacante puede falsificar mensajes y manifiestos; para una
+atribución pública e independiente se necesita una firma digital con clave
+privada y clave pública de verificación.
 
 ---
 
@@ -373,6 +405,18 @@ al atacante, y cómo lo evita `hmac.compare_digest()`? Describí el ataque
 concreto que esto previene.*
 
 **Respuesta:**
+
+Una comparación ingenua con `==` puede detenerse en el primer carácter que no
+coincide. Por eso, si el tag enviado comparte un prefijo más largo con el tag
+correcto, la ejecución puede tardar ligeramente más. Un atacante que pueda
+repetir consultas y medir esos tiempos puede probar candidatos y aprender qué
+prefijo es correcto, recuperando el tag byte por byte o carácter por carácter.
+
+`hmac.compare_digest()` está diseñada para comparar secretos sin ese retorno
+temprano dependiente de la posición de la primera diferencia, reduciendo la
+información temporal disponible para ese ataque. Así se evita que un endpoint
+que verifica HMAC funcione como un oráculo de tiempo; aun así, deben cuidarse
+también otros canales laterales y limitarse los intentos de consulta.
 
 ---
 
