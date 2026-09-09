@@ -16,7 +16,7 @@
 |---|---|
 | **Grupo** | 07 |
 | **Caso asignado (Parte A)** | *(a completar por Lautaro)* |
-| **Tema del mini-research** | *(a completar por Fernando)* |
+| **Tema del mini-research** | 2 — La cadena de suministro de software como superficie de ataque (SolarWinds/SUNBURST y Log4Shell) |
 | **Fecha de entrega** | *(antes del inicio de la Clase 2)* |
 
 ### Integrantes
