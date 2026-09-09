@@ -467,7 +467,7 @@ lee y suma. No es relleno: es donde se ve si entendieron el problema.*
 | Herramienta | Para qué se usó | Qué partes del entregable afectó | Cómo se verificó que lo devuelto era correcto |
 |---|---|---|---|
 | Claude (Anthropic) | Explicación de funciones de `pathlib` (`rglob`, `is_file`, `relative_to`, `as_posix`, `resolve`) y guía para implementar los TODO 1 y 2. Formateo de las salidas de terminal para la sección B.1. | `src/integridad.py`: funciones `generar_manifiesto()` y `verificar_manifiesto()`. Sección B.1 del informe. | El código se escribió y se probó de forma incremental: cada paso se ejecutó en la terminal antes de agregar el siguiente. Se verificaron los casos de directorio íntegro, modificación de un byte, archivo faltante, archivo nuevo, directorio vacío y manifiesto dentro del directorio recorrido. Las salidas pegadas en B.1 son reales. |
-| | | | |
+| OpenAI Codex | Explicación conceptual, implementación y depuración de los TODO 3 y 4, y revisión de las respuestas de análisis. | `src/integridad.py`: `distancia_hamming_bits()` y `calcular_mac()`; evidencia B.1; respuestas P1, P2 y P4. | Se verificó con pruebas directas de casos idénticos, bits opuestos, longitudes inválidas, HMAC válido e inválido, ejecución de la CLI, `py_compile` y `git diff --check`. |
 
 **Declaración:**
 
