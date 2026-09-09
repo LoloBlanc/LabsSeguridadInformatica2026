@@ -259,28 +259,52 @@ código de salida: 1
 ### Efecto avalancha
 
 ```
-$ python3 src/integridad.py avalancha --a "transferencia: $1000" --b "transferencia: $1001"
+$ python src/integridad.py avalancha --a "transferencia: $1000" --b "transferencia: $1001"
 
-(pegar salida)
+mensaje A: "transferencia: $1000"
+  SHA-256: 341511c4c817d55f30c81e212d0e82b0b16dd5a58d49fe5e45c9d5c998ab794a
+mensaje B: "transferencia: $1001"
+  SHA-256: 5fb87fd7adf8a226f61c666a3ed140b147501b8a1b8e1822e57fc4b3925323d9
+
+Distancia de Hamming: 139 de 256 bits (54.30 %)
+Efecto avalancha: para entradas distintas se espera un valor cercano al 50 %.
 ```
 
-**Distancia obtenida:** ____ bits de 256 (____ %)
+**Distancia obtenida:** 139 bits de 256 (54.30 %)
 
-*¿Coincide con lo esperado? ¿Qué esperaban antes de correrlo?*
+El resultado coincide con lo esperado: al cambiar un solo carácter se modificó
+aproximadamente la mitad de los bits del digest, en este caso un 54.30 %.
 
 ### HMAC
 
 ```
-$ python3 src/integridad.py mac --clave "secreto" --mensaje "transferir 1000"
+$ python src/integridad.py mac --clave "secreto" --mensaje "transferir 1000"
 
-(pegar salida)
+mensaje:      "transferir 1000"
+HMAC-SHA256:  96bc66546d55627136aeaaefbcead75520a57e19539834d03e74d705b70ff9fe
 ```
 
 ```
-$ python3 src/integridad.py mac --clave "secreto" --mensaje "transferir 1000" --verificar <tag válido>
-$ python3 src/integridad.py mac --clave "secreto" --mensaje "transferir 1000" --verificar <tag alterado>
+$ python src/integridad.py mac --clave "secreto" --mensaje "transferir 1000" --verificar 96bc66546d55627136aeaaefbcead75520a57e19539834d03e74d705b70ff9fe
+mensaje:      "transferir 1000"
+HMAC-SHA256:  96bc66546d55627136aeaaefbcead75520a57e19539834d03e74d705b70ff9fe
+tag recibido: 96bc66546d55627136aeaaefbcead75520a57e19539834d03e74d705b70ff9fe
 
-(pegar ambas salidas)
+TAG VÁLIDO — el mensaje es auténtico e íntegro.
+
+$ echo "código de salida: $?"
+código de salida: 0
+
+$ python src/integridad.py mac --clave "secreto" --mensaje "transferir 1000" --verificar 0000000000
+mensaje:      "transferir 1000"
+HMAC-SHA256:  96bc66546d55627136aeaaefbcead75520a57e19539834d03e74d705b70ff9fe
+tag recibido: 0000000000
+
+TAG INVÁLIDO — el mensaje fue alterado o la clave no es la correcta.
+
+$ echo "código de salida: $?"
+código de salida: 1
+
 ```
 
 ---
