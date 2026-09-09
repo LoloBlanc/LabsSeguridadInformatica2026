@@ -446,6 +446,7 @@ lee y suma. No es relleno: es donde se ve si entendieron el problema.*
 | Integrante | Aportes |
 |---|---|
 | Guadalupe Gómez | Estructura inicial del directorio del grupo. Implementación de `generar_manifiesto()` y `verificar_manifiesto()` (TODO 1 y 2). Pruebas de ejecución y evidencia de la sección B.1. Sección B.2. `INTEGRANTES.md`. |
+| Lorenzo Blanc | Implementación de `distancia_hamming_bits()` y `calcular_mac()` (TODO 3 y 4). Pruebas de distancia de Hamming y HMAC. Evidencia de ejecución de avalancha y HMAC. Respuestas P1, P2 y P4. |
 | | |
 | | |
 | | |
