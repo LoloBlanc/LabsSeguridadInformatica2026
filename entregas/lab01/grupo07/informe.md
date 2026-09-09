@@ -489,6 +489,7 @@ lee y suma. No es relleno: es donde se ve si entendieron el problema.*
 |---|---|
 | Guadalupe Gómez | Estructura inicial del directorio del grupo. Implementación de `generar_manifiesto()` y `verificar_manifiesto()` (TODO 1 y 2). Pruebas de ejecución y evidencia de la sección B.1. Sección B.2. `INTEGRANTES.md`. |
 | Lorenzo Blanc | Implementación de `distancia_hamming_bits()` y `calcular_mac()` (TODO 3 y 4). Pruebas de distancia de Hamming y HMAC. Evidencia de ejecución de avalancha y HMAC. Respuestas P1, P2 y P4. |
+| Fernando Cagliero | Elección del tema y redacción del mini-research sobre cadena de suministro: SolarWinds/SUNBURST, Log4Shell, SBOM y SLSA. Respuestas P3 y P5. Verificación de fuentes y revisión de la declaración de uso de IA. |
 | | |
 | | |
 | | |
