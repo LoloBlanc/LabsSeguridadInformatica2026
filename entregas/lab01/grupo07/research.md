@@ -1,218 +1,59 @@
-# Laboratorio 01 — Mini-research
-
-**Extensión:** 800 a 1000 palabras (sin contar bibliografía)
-**Modalidad:** un tema por grupo, a elección
-**Entrega:** `entregas/lab01/grupoXX/research.md`
-
----
-
-## Por qué se pide esto
-
-Un ingeniero en sistemas que trabaja en seguridad va a tener que leer
-documentación técnica, informes de incidentes y normativa, y va a tener que
-distinguir qué está respaldado de qué es marketing. Esa habilidad no se
-adquiere leyendo resúmenes: se adquiere yendo a la fuente.
-
-No se busca un resumen de Wikipedia con otras palabras. Se busca que tomen una
-posición y la defiendan con evidencia.
-
----
-
-## Temas a elección
-
-Elegí **uno**. Indicá cuál al principio del documento.
-
-### Tema 1 — La evolución del perfil del atacante, 1988 a hoy
-
-De un estudiante de posgrado que libera un gusano por curiosidad a
-organizaciones criminales con estructura empresarial, servicio de atención a
-la víctima y programas de afiliados.
-
-Cuestiones a abordar: qué motivaciones dominaron en cada etapa, cómo cambió la
-relación costo/beneficio del ataque, qué papel jugó la aparición de las
-criptomonedas, y qué implica este cambio para el modelo de amenaza de una PyME
-argentina hoy.
-
-### Tema 2 — La cadena de suministro de software como superficie de ataque
-
-Comprometer al proveedor para llegar a miles de clientes de una sola vez.
-Tomen como referencia el caso SolarWinds/SUNBURST (2020) y el caso Log4Shell
-(2021) — que son distintos entre sí, y esa diferencia es parte del análisis.
-
-Cuestiones a abordar: por qué el modelo de confianza tradicional falla acá,
-qué proponen las iniciativas de **SBOM** (Software Bill of Materials) y
-**SLSA**, y qué límites tienen esas propuestas.
-
-### Tema 3 — La disponibilidad, la propiedad descuidada de la tríada
-
-La confidencialidad se lleva los titulares. Pero para muchas organizaciones, un
-día sin sistemas cuesta más que una filtración de datos.
-
-Cuestiones a abordar: por qué la disponibilidad recibe menos atención en la
-formación y en el presupuesto, cómo el ransomware la convirtió en el vector
-económicamente más rentable, y qué relación tiene con conceptos como RTO, RPO y
-continuidad del negocio.
-
-### Tema 4 — Criptografía post-cuántica
-
-El NIST publicó en 2024 sus primeros estándares de criptografía resistente a
-computadoras cuánticas: **FIPS 203**, **FIPS 204** y **FIPS 205**.
-
-Cuestiones a abordar: qué problema resuelven exactamente (y cuál **no**
-resuelven), qué significa la estrategia *harvest now, decrypt later* para los
-datos que una organización cifra hoy, y qué implica la migración para sistemas
-en producción.
-
-> Ojo con este tema: es el que más ruido tiene en la divulgación. Distinguir lo
-> que dicen los documentos del NIST de lo que dicen los titulares es
-> exactamente el ejercicio.
-
-### Tema 5 — Ley 26.388 y las zonas grises de la divulgación responsable
-
-La Ley 26.388 incorporó al Código Penal argentino las figuras de delitos
-informáticos. La Ley 27.411 aprobó la adhesión al Convenio de Budapest.
-
-Cuestiones a abordar: qué conductas quedaron tipificadas, qué situación tiene
-en la Argentina quien descubre e informa de buena fe una vulnerabilidad en un
-sistema de terceros, y cómo tratan otras jurisdicciones ese mismo problema.
-
-> Trabajen con el texto de la ley, no con notas periodísticas sobre la ley. No
-> hace falta ser abogado; hace falta leer la fuente.
-
----
-
-## Requisitos
-
-### Extensión
-
-Entre **800 y 1000 palabras**, sin contar la bibliografía. Fuera de ese rango
-se penaliza. La restricción es parte del ejercicio: obliga a decidir qué entra
-y qué no.
-
-### Fuentes
-
-- **Mínimo 3 fuentes.**
-- De ellas, **al menos 2 deben ser primarias o arbitradas**.
-
-| Cuenta como primaria o arbitrada | No cuenta |
-|---|---|
-| Documentos del NIST, ISO, IETF (RFC) | Wikipedia |
-| Texto de una ley o resolución oficial | Blogs de divulgación general |
-| Papers con revisión por pares | Notas periodísticas |
-| Informes técnicos oficiales de un fabricante o CERT | Videos de YouTube |
-| Informes forenses de un incidente publicados por la organización afectada | Publicaciones de LinkedIn |
-
-Las fuentes secundarias **se pueden usar** — de hecho son útiles para armar la
-cronología de un hecho. Solo que no cuentan para el mínimo de dos.
-
-### Citación
-
-Formato **APA**. Citas en el cuerpo del texto donde corresponda, y lista
-completa al final.
-
-**Toda fuente citada tiene que existir y ser localizable.** Una cita inventada
-o que no se puede encontrar es **causal de rechazo automático** de la entrega
-completa. Esto no es una formalidad: es lo que distingue un trabajo técnico de
-una opinión.
-
-### Declaración de uso de IA
-
-Obligatoria, al final del documento. Ver el modelo más abajo.
-
-Advertencia específica para este trabajo: **los asistentes de IA fabrican citas
-con mucha facilidad.** Producen referencias con formato impecable, autores
-plausibles y años coherentes que no existen. Si usaste un asistente para
-buscar bibliografía, **verificá cada referencia entrando a la fuente original**
-antes de citarla. Una cita inexistente hunde el trabajo, y la responsabilidad
-es de quien firma.
-
----
-
-## Estructura sugerida
-
-No es obligatoria, pero funciona:
-
-1. **Planteo** (~100 palabras) — cuál es la pregunta y por qué importa.
-2. **Desarrollo** (~600 palabras) — la evidencia, organizada. Acá van las citas.
-3. **Tensión o límite** (~150 palabras) — qué no está resuelto, qué se discute,
-   dónde falla la solución que describiste. Esta sección es la que distingue un
-   trabajo bueno de uno correcto.
-4. **Cierre** (~100 palabras) — qué implica para la práctica profesional.
-
----
-
-## Evaluación
-
-Vale **20 de los 100 puntos** del laboratorio. El desglose está en
-[`rubrica.md`](rubrica.md).
-
-Lo que más pesa: **calidad de las fuentes** y **el análisis propio**. Un
-trabajo que resume correctamente tres fuentes buenas sin agregar nada llega a
-la mitad del puntaje. Lo que sube la nota es la sección de tensión: mostrar que
-entendieron dónde la respuesta no es limpia.
-
----
-
-## Plantilla
-
-```markdown
 # Mini-research — Lab 01
 
-**Grupo:** NN
-**Tema elegido:** N — (título)
-**Cantidad de palabras:** ___ (sin bibliografía)
+**Grupo:** 07
+**Tema elegido:** 2 — La cadena de suministro de software como superficie de ataque (SolarWinds/SUNBURST y Log4Shell)
+**Cantidad de palabras:** 832 (sin bibliografía ni declaración de IA)
 
 ---
 
 ## Planteo
 
-(...)
+La cadena de suministro de software no es solamente el proveedor al que una organización le compra un producto. También incluye el código abierto, las dependencias transitivas, los repositorios, las herramientas de compilación, el proceso de distribución y las actualizaciones. Por eso, una organización puede mantener sus propios controles y aun así recibir software comprometido o vulnerable. SolarWinds/SUNBURST y Log4Shell muestran dos caminos distintos hacia el mismo problema: el primero abusó de la confianza depositada en un proceso de construcción y actualización; el segundo convirtió una dependencia ampliamente usada en una puerta de entrada. La respuesta no puede ser confiar ciegamente ni rechazar toda dependencia externa, sino hacer verificable qué se usa, cómo se construyó y qué riesgos permanecen.
 
 ## Desarrollo
 
-(...)
+SolarWinds/SUNBURST fue un compromiso de la cadena de suministro en sentido estricto. Según la propia empresa, el código malicioso fue insertado en el sistema de construcción de Orion y apareció en actualizaciones distribuidas entre marzo y junio de 2020, aunque no estaba presente en el repositorio de código fuente (SolarWinds, s. f.). CISA identificó como afectadas determinadas versiones de Orion y recomendó a las organizaciones desconectar los productos comprometidos y seguir las indicaciones de respuesta (Cybersecurity and Infrastructure Security Agency [CISA], 2020). El ataque no necesitó convencer a cada víctima para descargar un ejecutable extraño: aprovechó que el proveedor era una fuente legítima y que el mecanismo habitual de actualización era considerado confiable.
+
+La debilidad central fue una relación de confianza demasiado amplia. La distribución oficial demostraba que el archivo provenía del canal esperado, pero no que el proceso interno que lo produjo hubiera sido íntegro. Al alterar la compilación, el atacante convirtió una actualización normal en un vehículo para alcanzar a muchos clientes.
+
+Log4Shell tuvo una naturaleza diferente. No fue una puerta trasera insertada en una actualización, sino una vulnerabilidad presente en una biblioteca de código abierto utilizada por muchos productos. Apache documentó que ciertos mensajes podían activar resoluciones JNDI inseguras y publicó una corrección en Log4j 2.15.0 (Apache Logging Services, 2021). La alerta conjunta de CISA, FBI, NSA y organismos asociados describió explotación activa y pidió inventariar también los activos de nube para encontrar las versiones vulnerables (CISA et al., 2021).
+
+La diferencia es importante. SUNBURST atacó la integridad del producto antes de que llegara al cliente: el artefacto podía ser legítimo por su canal de distribución y, al mismo tiempo, malicioso. Log4Shell afectó una dependencia legítima durante la ejecución. En SUNBURST había que verificar el binario y su proceso de construcción; en Log4Shell había que descubrir dónde estaba Log4j, incluso como dependencia transitiva, y qué versión se ejecutaba. Firmar paquetes no corrige una vulnerabilidad, y conocer una dependencia no demuestra que el artefacto no haya sido alterado.
+
+Un SBOM intenta resolver la falta de visibilidad. La NTIA lo define como un registro formal de los componentes y relaciones usados para construir un software (National Telecommunications and Information Administration [NTIA], 2021). Debe permitir identificar componentes directos y transitivos, versiones y proveedores en formatos procesables automáticamente. Frente a Log4Shell, permite ubicar productos que incluyen Log4j y priorizar la actualización, en lugar de depender de una etiqueta comercial.
+
+SLSA complementa al SBOM porque se ocupa de la procedencia y del proceso de construcción. Define la *provenance* como información verificable sobre dónde, cuándo y cómo se produjo un artefacto (SLSA, s. f.). Sus niveles agregan garantías progresivas, como procedencia firmada y controles contra la manipulación durante el build. NIST también recomienda conservar procedencia y entregar un SBOM para mejorar la comunicación entre productores y consumidores (Souppaya et al., 2022). La idea conjunta es reemplazar confianza implícita por evidencia verificable.
 
 ## Tensión / límites
 
-(...)
+Ni SBOM ni SLSA son una solución automática. Un SBOM puede estar incompleto, desactualizado o limitarse a componentes declarados, sin mostrar artefactos descargados dinámicamente. Enumerar una versión tampoco indica si está expuesta, si la vulnerabilidad es alcanzable o si el binario coincide con el documento publicado. Por eso mejora la detección y priorización, pero no reemplaza el parcheo, las pruebas ni la supervisión de runtime.
+
+SLSA aporta evidencia, pero depende de que el consumidor la verifique y confíe en la plataforma que la genera. Los niveles bajos pueden ser incompletos o fáciles de falsificar y los altos exigen cambios costosos. Una procedencia auténtica incluso puede describir un build que incluyó una dependencia vulnerable. Para reducir SUNBURST se necesitan controles sobre repositorios, identidades, separación de funciones y validación independiente. Para Log4Shell se necesitan inventario continuo, gestión de vulnerabilidades y respuesta. La tensión consiste en convertir metadatos en decisiones operativas sin tratarlos como una garantía absoluta.
 
 ## Cierre
 
-(...)
+SolarWinds y Log4Shell demuestran que “viene de un proveedor confiable” no basta para aceptar software. La seguridad debe cubrir tanto la integridad del proceso de construcción como las dependencias indirectas. Una PyME puede aplicar el principio manteniendo un inventario, exigiendo versiones y procedencia, verificando actualizaciones y definiendo la respuesta ante vulnerabilidades críticas. SBOM y SLSA reducen el tiempo de descubrimiento y la superficie de confianza, pero no eliminan la evaluación de riesgo.
 
 ---
 
 ## Bibliografía
 
-Formato APA. Marcá cada fuente como [PRIMARIA], [ARBITRADA] o [SECUNDARIA].
-
-1. [PRIMARIA] ...
-2. [ARBITRADA] ...
-3. [SECUNDARIA] ...
+1. [PRIMARIA] Apache Logging Services. (2021). *Release notes: Apache Log4j 2*. https://logging.apache.org/log4j/2.x/release-notes.html
+2. [PRIMARIA] Cybersecurity and Infrastructure Security Agency. (2020, 13 de diciembre). *Active exploitation of SolarWinds software*. https://www.cisa.gov/news-events/alerts/2020/12/13/active-exploitation-solarwinds-software
+3. [PRIMARIA] Cybersecurity and Infrastructure Security Agency, Federal Bureau of Investigation, National Security Agency, Australian Cyber Security Centre, Canadian Centre for Cyber Security, CERT NZ, & National Cyber Security Centre. (2021, 23 de diciembre). *AA21-356A: Mitigating Log4Shell and other Log4j-related vulnerabilities*. https://www.cisa.gov/news-events/cybersecurity-advisories/aa21-356a
+4. [PRIMARIA] National Telecommunications and Information Administration. (2021, 12 de julio). *The minimum elements for a software bill of materials (SBOM)*. https://www.ntia.gov/report/2021/minimum-elements-software-bill-materials-sbom
+5. [PRIMARIA] SLSA. (s. f.). *SLSA specification (Version 1.2)*. Recuperado el 8 de septiembre de 2026, de https://slsa.dev/spec/v1.2/
+6. [PRIMARIA] SolarWinds. (s. f.). *Security advisory FAQ*. Recuperado el 8 de septiembre de 2026, de https://www.solarwinds.com/sa-overview/securityadvisory/faq
+7. [PRIMARIA] Souppaya, M., Scarfone, K., & Dodson, D. (2022). *Secure software development framework (SSDF) version 1.1: Recommendations for mitigating the risk of software vulnerabilities* (NIST SP 800-218). National Institute of Standards and Technology. https://doi.org/10.6028/NIST.SP.800-218
 
 ---
 
 ## Declaración de uso de asistentes de IA
 
-**¿Se usaron asistentes de IA en este trabajo?** Sí / No
+**¿Se usaron asistentes de IA en este trabajo?** Sí.
 
-| Herramienta | Para qué | Qué partes afectó | Cómo se verificó |
+| Herramienta | Para qué se usó | Qué partes afectó | Cómo se verificó |
 |---|---|---|---|
-| | | | |
+| OpenAI Codex | Como apoyo para ubicar fuentes oficiales, proponer una estructura inicial, contrastar conceptos de SBOM/SLSA y revisar claridad y extensión. | Búsqueda orientativa, organización y revisión del planteo, desarrollo, tensión/límites y cierre. | Fernando accedió a las fuentes originales, comprobó que cada referencia existiera y fuera localizable, contrastó las afirmaciones técnicas con los documentos citados y revisó/reformuló el texto final antes de incorporarlo. |
 
-**Verificación de fuentes:** el grupo declara haber accedido y verificado
-individualmente cada una de las referencias citadas.
-```
-
----
-
-## Cómo contar las palabras
-
-```bash
-# Contar palabras de un archivo markdown, aproximado
-wc -w research.md
-```
-
-Restá a mano lo que ocupan la bibliografía y la declaración de IA, o contá solo
-las secciones de contenido. No hace falta precisión al dígito: si están entre
-780 y 1020 no hay problema. Si entregan 400 o 1800, sí.
+**Verificación de fuentes:** el integrante declara haber accedido y verificado individualmente cada una de las referencias citadas.
