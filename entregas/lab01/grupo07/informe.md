@@ -133,24 +133,42 @@ durante meses es pérdida de disponibilidad en sentido pleno.
 
 ## A.4 — Encadenamiento amenaza → vulnerabilidad → impacto
 
-*Redacción en prosa, no viñetas. Usá los términos con precisión: una amenaza
-no es una vulnerabilidad, un exploit no es una vulnerabilidad, y el impacto
-no es el ataque.*
-
 ```
 amenaza  →  explota  →  vulnerabilidad  →  sobre  →  activo  →  produce  →  impacto
 ```
 
 | Elemento | En este caso |
 |---|---|
-| **Amenaza** *(quién / qué, con qué motivación)* | |
-| **Vulnerabilidad** *(la debilidad concreta que se explotó)* | |
-| **Activo** *(sobre qué recayó)* | |
-| **Impacto** *(consecuencia sobre el negocio o las personas)* | |
+| **Amenaza** *(quién / qué, con qué motivación)* | Un actor estatal con capacidad de operación sostenida: presupuesto para quemar cuatro vulnerabilidades de día cero en una sola campaña, capacidad de robar claves de firma en dos empresas distintas y —lo más caro de conseguir— conocimiento de ingeniería de las centrífugas IR-1 y de su régimen de operación. **Motivación:** retrasar el programa de enriquecimiento iraní sin recurrir a un ataque cinético y sin atribución. La autoría nunca fue reconocida oficialmente; la investigación periodística la adjudica a una operación conjunta de EE.UU. e Israel denominada *Olympic Games* (Sanger, 2012). |
+| **Vulnerabilidad** *(la debilidad concreta que se explotó)* | No una, sino una cadena, y conviene separar las dos clases. **La habilitante, de diseño y específica del dominio:** los PLC S7-300/400 aceptan la descarga de bloques de lógica **sin autenticar el origen ni verificar la integridad del programa**, y Step7 depende de una única biblioteca de usuario (`s7otbxdx.dll`) para leer lo que hay cargado en el controlador, sin ninguna verificación independiente. **Las de acceso, de propósito general:** CVE-2010-2568 (MS10-046), ejecución de código al renderizar el ícono de un acceso directo en un medio extraíble —es la que atraviesa el *air gap*—, CVE-2010-2729 (MS10-061, cola de impresión) y dos elevaciones de privilegio locales. A ellas se suma que la confianza depositada en la firma de código se volvió en contra al robarse las claves de Realtek y JMicron. |
+| **Activo** *(sobre qué recayó)* | La lógica de control de los PLC S7-315/S7-417 de las cascadas IR-1 de Natanz y el proceso de enriquecimiento que esa lógica gobierna. |
+| **Impacto** *(consecuencia sobre el negocio o las personas)* | Destrucción física de ~1.000 centrífugas IR-1, cascadas fuera de servicio durante meses y retraso del programa de enriquecimiento. Un impacto de segundo orden, más caro de reparar que el hardware: el operador perdió la capacidad de confiar en su propia instrumentación, porque el mismo sistema encargado de informarle el estado del proceso era el que le mentía. |
 
 **Redacción:**
 
-*Un párrafo que encadene los cuatro elementos anteriores.*
+Un actor estatal con recursos de nivel militar (**amenaza**), cuya motivación era
+frenar el enriquecimiento de uranio iraní sin acción militar visible, explotó
+mediante un acceso directo `.LNK` alojado en un medio extraíble la falla de
+validación del Shell de Windows CVE-2010-2568 (**vulnerabilidad de acceso**) para
+atravesar la separación física de la red de Natanz y alcanzar las estaciones de
+ingeniería Step7. Una vez ahí explotó una segunda debilidad, de diseño y bastante
+más grave que las de Windows: que el controlador S7 **acepta lógica de control
+sin autenticar su origen** y que Step7 no verifica de forma independiente qué hay
+efectivamente cargado en él (**vulnerabilidad habilitante**), sobre los PLC que
+gobiernan las cascadas de centrífugas IR-1 (**activo**). El resultado fue la
+manipulación de las consignas de frecuencia de los rotores mientras el HMI seguía
+mostrando valores normales, lo que **produjo** el **impacto**: unas mil
+centrífugas destruidas, seis cascadas fuera de línea todavía en agosto de 2010 y
+un operador que ya no podía creerle a su propio tablero.
+
+Conviene marcar las distinciones que el encadenamiento exige. La **amenaza** es
+el actor con capacidad e intención, no el gusano. Stuxnet es el **exploit** —el
+instrumento con el que la amenaza se materializa—, y un exploit no es una
+vulnerabilidad: es lo que la aprovecha. La **vulnerabilidad** es la debilidad
+preexistente, que aquí no fue principalmente un bug de Windows sino una decisión
+de diseño de la plataforma de control. Y el **impacto** no es «el ataque» sino su
+consecuencia medible sobre el activo: centrífugas destruidas y producción
+detenida, no «hubo un ataque informático».
 
 ---
 
