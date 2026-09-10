@@ -52,15 +52,39 @@
 
 ## A.2 — Activo afectado
 
-*¿Qué se estaba protegiendo? Concreto: no «los datos», sino qué datos, de
-quién, en qué sistema. Si hubo más de un activo, priorizá y justificá el
-orden.*
-
 **Activo principal:**
+
+La **lógica de control cargada en los PLC Siemens SIMATIC S7-315 y S7-417 que
+gobiernan las cascadas de centrífugas IR-1 de la planta de enriquecimiento de
+combustible (FEP) de Natanz, Irán**, y —como extensión inseparable de esa
+lógica— el proceso físico de enriquecimiento que esos controladores regulan.
 
 **Por qué es el principal:**
 
-**Otros activos afectados:**
+Porque es el único activo que el atacante buscó deliberadamente. Stuxnet se
+propagó a más de un centenar de miles de equipos en todo el mundo, pero el
+payload de sabotaje sólo se arma si el host tiene Step7/WinCC instalado **y**
+si el PLC gobierna variadores de frecuencia Fararo Paya o Vacon operando entre
+807 Hz y 1210 Hz (Falliere et al., 2011). En cualquier otro equipo el gusano se
+queda inerte. Las PC Windows infectadas fueron el **medio de transporte**, no el
+objetivo: confundirlas con el activo es el error de análisis más común en este
+caso.
+
+**Otros activos afectados** (en orden de relevancia):
+
+1. **La integridad de los valores de proceso presentados al operador** en las
+   estaciones WinCC/HMI. En la rutina contra el S7-417 el atacante grababa 21
+   segundos de lecturas de sensores y las reproducía en bucle, de modo que el
+   tablero mostraba un proceso normal mientras se saboteaba (Langner, 2013).
+2. **Las claves privadas de firma de código de Realtek Semiconductor y JMicron
+   Technology**, robadas y usadas para firmar los drivers del rootkit; ambos
+   certificados debieron revocarse en julio de 2010.
+3. **Información de inventario de los equipos infectados colateralmente**
+   (nombre de equipo, dominio, versión de SO, dirección IP y presencia de
+   Step7/WinCC), enviada a los servidores de mando y control
+   `www.mypremierfutbol.com` y `www.todaysfutbol.com`.
+4. **Las centrífugas IR-1** como activo físico, destruidas por el efecto de la
+   manipulación.
 
 ---
 
