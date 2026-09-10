@@ -15,7 +15,7 @@
 | | |
 |---|---|
 | **Grupo** | 07 |
-| **Caso asignado (Parte A)** | *(a completar por Lautaro)* |
+| **Caso asignado (Parte A)** | 1 — **Stuxnet** (2010), por `7 mod 6 = 1` |
 | **Tema del mini-research** | 2 — La cadena de suministro de software como superficie de ataque (SolarWinds/SUNBURST y Log4Shell) |
 | **Fecha de entrega** | *(antes del inicio de la Clase 2)* |
 
@@ -31,6 +31,9 @@
 ---
 
 # PARTE A — Análisis del incidente bajo la lente CIA
+
+**Caso:** 1 — **Stuxnet** (2010). Asignado por la regla del enunciado:
+`número_de_grupo mod 6` → `7 mod 6 = 1`.
 
 ## A.1 — Cronología
 
