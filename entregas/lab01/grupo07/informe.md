@@ -38,6 +38,7 @@
 ## A.1 — Cronología
 
 | Fecha | Hecho | Fuente |
+|---|---|---|
 | Jun. 2009 | Se compila la muestra más antigua conocida de Stuxnet. | Symantec [3] |
 | Fines 2009 – ppios. 2010 | Natanz reemplaza unas 1.000 centrífugas IR-1 de las ~9.000 desplegadas; el OIEA registra 11 cascadas fuera de línea. | ISIS [1] [2] |
 | Mar. 2010 | Aparece la variante que explota CVE-2010-2568: un `.LNK` malicioso ejecuta código con solo mostrarse el ícono. Es el vector que cruza la red aislada por USB. | Symantec [3] |
@@ -47,7 +48,9 @@
 | Sep. 2010 | Se publica el análisis que identifica el objetivo real: los PLC Siemens S7, no las PC Windows. | Langner [4] |
 | Nov. 2010 | Se acota el blanco a variadores de frecuencia que operan entre 807 Hz y 1210 Hz. | Symantec [3] |
 | 2013 | Se documenta una segunda rutina, anterior, contra el S7-417: ataque de sobrepresión que oculta el sabotaje reproduciendo 21 s de lecturas grabadas. | Langner [5] |
+
 *Los números entre corchetes remiten a la lista de fuentes de A.6.*
+
 ---
 
 ## A.2 — Activo afectado
@@ -90,24 +93,41 @@ caso.
 
 ## A.3 — Matriz CIA
 
-*Una fila por propiedad. La columna «Evidencia» tiene que citar un hecho
-concreto del incidente, no una generalidad.*
-
-> **Advertencia.** «No» es una respuesta válida y muchas veces la correcta.
-> El error típico es marcar las tres propiedades en «Sí» porque el incidente
-> fue grave. La gravedad no es una propiedad de la tríada. Si marcás que se
-> violó la integridad, tenés que mostrar **qué dato específico fue alterado**.
-> Si no podés mostrarlo, la respuesta es «No».
-
 | Propiedad | ¿Se violó? | Evidencia concreta |
 |---|---|---|
-| **Confidencialidad** | Sí / No / Parcial | |
-| **Integridad** | Sí / No / Parcial | |
-| **Disponibilidad** | Sí / No / Parcial | |
+| **Confidencialidad** | **Parcial** | Hubo exfiltración documentada, pero instrumental y periférica al objetivo. Cada host infectado enviaba a los C&C `www.mypremierfutbol.com` y `www.todaysfutbol.com` el nombre del equipo, el dominio, la versión del SO, la IP y si tenía Step7/WinCC instalado (Falliere et al., 2011). En paralelo, el atacante comprometió las **claves privadas de firma** de Realtek y JMicron —un secreto criptográfico ajeno— para firmar `mrxnet.sys` y `mrxcls.sys`; VeriSign las revocó el 16 y el 22 de julio de 2010. No hay evidencia de que se hayan sustraído datos de enriquecimiento, planos ni datos personales desde Natanz: por eso «Parcial» y no «Sí». |
+| **Integridad** | **Sí** | Es el eje del ataque y hay dato alterado identificable en tres capas. (1) **Software:** Stuxnet renombra `s7otbxdx.dll` a `s7otbxsx.dll` y la reemplaza por su propia versión, con lo que se interpone en toda comunicación Step7↔PLC; puede escribir bloques en el controlador y devolverle al ingeniero la versión limpia cuando éste lee el proyecto (Falliere et al., 2011). (2) **Lógica de control:** inyecta bloques propios y altera los bloques de organización del PLC, cambiando el programa que ejecuta el controlador. (3) **Valores de proceso:** modifica las consignas de frecuencia enviadas a los variadores —lleva el rotor de las ~63.000 rpm nominales a 84.600 rpm durante quince minutos y después casi a la detención, 120 rpm (Langner, 2013)— y, en la rutina del S7-417, sustituye las lecturas reales de los sensores por 21 segundos grabados y reproducidos en bucle. |
+| **Disponibilidad** | **Sí** | La violación de integridad se materializó en pérdida de servicio del activo, con evidencia externa e independiente del atacante: alrededor de **1.000 centrífugas IR-1 de las ~9.000 desplegadas** en Natanz fueron retiradas y reemplazadas entre fines de 2009 y comienzos de 2010, y los datos de salvaguardias del OIEA muestran **11 cascadas A26 fuera de línea**, de las cuales **6 seguían fuera de línea en agosto de 2010** (Albright et al., 2010; 2011). |
 
 **Justificación ampliada de la propiedad más discutible:**
 
-*De las tres, ¿cuál fue la más difícil de determinar y por qué? Desarrollá.*
+La más difícil de determinar fue la **confidencialidad**, y el motivo es que las
+dos respuestas fáciles son incorrectas.
+
+Marcar «No» es lo intuitivo: Stuxnet es el arma de sabotaje por antonomasia, no
+una operación de espionaje; no se llevó ni un byte de datos de enriquecimiento.
+Pero «No» exige que no haya habido pérdida alguna de información, y sí la hubo:
+el gusano reporta a sus C&C un perfil del equipo infectado —nombre, dominio, SO,
+IP, presencia de Step7/WinCC—, es decir, hace reconocimiento y lo exfiltra.
+Además, el robo de las claves privadas de Realtek y JMicron es una violación de
+confidencialidad de manual: un secreto que sólo el titular debía conocer terminó
+en poder de un tercero, y la prueba de que se lo consideró comprometido es que
+ambos certificados se revocaron.
+
+Marcar «Sí» a secas es el error opuesto: sobredimensiona el hecho y sugiere que
+hubo una fuga de información del activo protegido, que es exactamente lo que no
+ocurrió. «Parcial» es la única respuesta que se sostiene con la evidencia: la
+confidencialidad se violó, pero sobre activos accesorios y como medio para
+sostener el ataque a la integridad, no como fin.
+
+Vale registrar además una decisión sobre la **disponibilidad**. Si se aplica la
+tríada en su lectura más estrecha —sólo sobre información— podría argumentarse
+que destruir centrífugas es un daño físico y no una pérdida de disponibilidad.
+Descartamos esa lectura: en sistemas de control industrial el activo protegido
+incluye el proceso que el sistema gobierna, y de hecho la guía de referencia
+para OT invierte el orden de prioridades habitual y pone la disponibilidad en
+primer lugar (NIST, 2023). Bajo ese marco, dejar seis cascadas fuera de línea
+durante meses es pérdida de disponibilidad en sentido pleno.
 
 ---
 
