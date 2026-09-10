@@ -174,25 +174,21 @@ detenida, no «hubo un ataque informático».
 
 ## A.5 — Dos controles mitigantes
 
-*Controles que, de haber estado implementados, habrían evitado o reducido el
-incidente. Específicos y justificados contra **este** caso. «Tener antivirus»
-o «capacitar a los usuarios» no califica.*
-
 ### Control 1
 
 | | |
 |---|---|
-| **Qué es** | |
-| **Propiedad de la tríada que protege** | |
-| **Por qué habría funcionado en este caso concreto** | |
+| **Qué es** | **Firma criptográfica y verificación en el propio PLC de la lógica de control descargada.** El controlador ejecuta únicamente bloques cuya firma digital valide contra una clave pública grabada en su firmware, con la clave privada custodiada fuera de la estación de ingeniería (HSM o equipo desconectado); además, expone un digest del programa efectivamente cargado por un canal que no atraviesa la biblioteca de comunicaciones de Step7. |
+| **Propiedad de la tríada que protege** | **Integridad** (de la lógica de control), con efecto derivado sobre la **disponibilidad** del proceso. |
+| **Por qué habría funcionado en este caso concreto** | Porque ataca exactamente el mecanismo de Stuxnet, no una generalidad. El corazón del ataque fue escribir bloques propios en un PLC que **no pide credenciales ni verifica el origen del código** y después ocultarlos interponiendo su propia `s7otbxdx.dll` entre Step7 y el controlador (Falliere et al., 2011). Con verificación de firma **en el controlador**, los bloques inyectados serían rechazados aunque la estación de ingeniería estuviera totalmente comprometida —y ése es el punto: el control no depende de que el Windows esté sano, que es justamente lo que Stuxnet dio por sentado. Y como el digest del programa cargado se lee por un canal ajeno a la DLL secuestrada, la mitad «ocultamiento» del ataque tampoco funcionaría: el ingeniero vería que lo que corre en el PLC no es lo que él descargó. |
 
 ### Control 2
 
 | | |
 |---|---|
-| **Qué es** | |
-| **Propiedad de la tríada que protege** | |
-| **Por qué habría funcionado en este caso concreto** | |
+| **Qué es** | **Verificación independiente (*out-of-band*) del proceso físico.** Instrumentar las variables críticas —velocidad de rotor, presión, vibración— con sensores y adquisición que **no pasen por el PLC ni por el HMI del sistema de control**: un registrador o historiador en paralelo, con alarma automática por discrepancia entre la lectura independiente y la que informa el sistema de control. |
+| **Propiedad de la tríada que protege** | **Disponibilidad** (permite detener el proceso antes de la destrucción) y, de manera derivada, **detección** de la pérdida de integridad. |
+| **Por qué habría funcionado en este caso concreto** | Porque el ataque no duró meses por falta de gente mirando, sino porque **lo que miraban se lo dictaba el atacante**. En la rutina contra el S7-417 se grababan 21 segundos de valores de sensores y se reproducían en bucle durante el sabotaje, y en la del S7-315 el rotor pasaba de ~63.000 a 84.600 rpm sin que el tablero lo reflejara (Langner, 2013). Una lectura de velocidad o de vibración tomada **por fuera de esa cadena** habría mostrado la discrepancia ya en la primera corrida de quince minutos, y la cascada se habría podido detener mucho antes de acumular mil centrífugas rotas. No se trata de «poner más sensores»: el principio es no derivar la evidencia de integridad del mismo componente que se sospecha comprometido —el mismo razonamiento por el que, en la Parte B de este laboratorio, el manifiesto no puede vivir dentro del directorio que pretende proteger. |
 
 ---
 
