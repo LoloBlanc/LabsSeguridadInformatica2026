@@ -194,13 +194,56 @@ detenida, no «hubo un ataque informático».
 
 ## A.6 — Fuentes consultadas (Parte A)
 
-*Formato APA. Indicá para cada una si es primaria (informe oficial, documento
-del fabricante, resolución judicial, paper) o secundaria (nota periodística,
-entrada de blog).*
+1. Albright, D., Brannan, P. y Walrond, C. (2010, 22 de diciembre). *Did Stuxnet
+   take out 1,000 centrifuges at the Natanz enrichment plant?* Institute for
+   Science and International Security.
+   https://isis-online.org/isis-reports/did-stuxnet-take-out-1000-centrifuges-at-the-natanz-enrichment-plant/
+   — **Primaria** (análisis técnico construido sobre datos de salvaguardias del OIEA).
 
-1.
-2.
-3.
+2. Albright, D., Brannan, P. y Walrond, C. (2011, 15 de febrero). *Stuxnet
+   malware and Natanz: Update of ISIS December 22, 2010 report*. Institute for
+   Science and International Security.
+   https://isis-online.org/uploads/isis-reports/documents/stuxnet_update_15Feb2011.pdf
+   — **Primaria**.
+
+3. Falliere, N., O Murchu, L. y Chien, E. (2011). *W32.Stuxnet dossier*
+   (versión 1.4). Symantec Security Response.
+   https://docs.broadcom.com/doc/security-response-w32-stuxnet-dossier-11-en
+   — **Primaria** (ingeniería inversa de las muestras por el equipo que las analizó).
+
+4. Langner, R. (2011). Stuxnet: Dissecting a cyberwarfare weapon. *IEEE Security
+   & Privacy, 9*(3), 49–51. https://doi.org/10.1109/MSP.2011.67
+   — **Arbitrada** (revista con revisión por pares del IEEE).
+
+5. Langner, R. (2013, noviembre). *To kill a centrifuge: A technical analysis of
+   what Stuxnet's creators tried to achieve*. The Langner Group. El sitio
+   original (`langner.com`) hoy redirige al producto de la empresa; se consultó
+   la copia archivada, verificada el 09/09/2026, en
+   https://archive.org/details/to-kill-a-centrifuge
+   — **Primaria**.
+
+6. Microsoft. (2010, 2 de agosto). *Microsoft Security Bulletin MS10-046 —
+   Critical: Vulnerability in Windows Shell could allow remote code execution
+   (2286198)*.
+   https://learn.microsoft.com/en-us/security-updates/securitybulletins/2010/ms10-046
+   — **Primaria** (boletín del fabricante).
+
+7. National Institute of Standards and Technology. (2010). *CVE-2010-2568
+   detail*. National Vulnerability Database.
+   https://nvd.nist.gov/vuln/detail/CVE-2010-2568
+   — **Primaria**.
+
+8. National Institute of Standards and Technology. (2023). *SP 800-82 Rev. 3:
+   Guide to Operational Technology (OT) security*.
+   https://csrc.nist.gov/pubs/sp/800/82/r3/final
+   — **Primaria** (usada para el criterio de prioridad de la tríada en entornos OT).
+
+9. Sanger, D. E. (2012, 1 de junio). Obama order sped up wave of cyberattacks
+   against Iran. *The New York Times*. Reproducido en ICRC Casebook:
+   https://casebook.icrc.org/case-study/iran-victim-cyber-warfare
+   — **Secundaria** (periodística). Se usa **únicamente** para la atribución, que
+   nunca fue reconocida oficialmente por ningún Estado y que por lo tanto se
+   presenta como versión de prensa, no como hecho establecido.
 
 ---
 
@@ -594,3 +637,6 @@ repetirse acá o referenciarse a la sección A.6.*
    https://csrc.nist.gov/News/2017/Research-Results-on-SHA-1-Collisions
 3. OWASP Foundation. (s. f.). *Password storage cheat sheet*.
    https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
+4. Las fuentes de la Parte A (nueve referencias sobre el caso Stuxnet, con su
+   marcación de primaria / arbitrada / secundaria) están listadas en la sección
+   **A.6 — Fuentes consultadas (Parte A)**.
