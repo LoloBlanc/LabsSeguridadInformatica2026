@@ -596,10 +596,7 @@ lee y suma. No es relleno: es donde se ve si entendieron el problema.*
 | Guadalupe Gómez | Estructura inicial del directorio del grupo. Implementación de `generar_manifiesto()` y `verificar_manifiesto()` (TODO 1 y 2). Pruebas de ejecución y evidencia de la sección B.1. Sección B.2. `INTEGRANTES.md`. |
 | Lorenzo Blanc | Implementación de `distancia_hamming_bits()` y `calcular_mac()` (TODO 3 y 4). Pruebas de distancia de Hamming y HMAC. Evidencia de ejecución de avalancha y HMAC. Respuestas P1, P2 y P4. |
 | Fernando Cagliero | Elección del tema y redacción del mini-research sobre cadena de suministro: SolarWinds/SUNBURST, Log4Shell, SBOM y SLSA. Respuestas P3 y P5. Verificación de fuentes y revisión de la declaración de uso de IA. |
-| | |
-| | |
-| | |
-| | |
+| Lautaro Mariño | Parte A completa sobre el caso Stuxnet (2010): cronología con fuentes (A.1), identificación y priorización del activo (A.2), matriz CIA con evidencia y justificación de la propiedad más discutible (A.3), encadenamiento amenaza→vulnerabilidad→activo→impacto (A.4), los dos controles mitigantes (A.5) y la verificación de las nueve fuentes en formato APA (A.6). |
 
 ---
 
@@ -617,6 +614,7 @@ lee y suma. No es relleno: es donde se ve si entendieron el problema.*
 |---|---|---|---|
 | Claude (Anthropic) | Explicación de funciones de `pathlib` (`rglob`, `is_file`, `relative_to`, `as_posix`, `resolve`) y guía para implementar los TODO 1 y 2. Formateo de las salidas de terminal para la sección B.1. | `src/integridad.py`: funciones `generar_manifiesto()` y `verificar_manifiesto()`. Sección B.1 del informe. | El código se escribió y se probó de forma incremental: cada paso se ejecutó en la terminal antes de agregar el siguiente. Se verificaron los casos de directorio íntegro, modificación de un byte, archivo faltante, archivo nuevo, directorio vacío y manifiesto dentro del directorio recorrido. Las salidas pegadas en B.1 son reales. |
 | OpenAI Codex | Explicación conceptual, implementación y depuración de los TODO 3 y 4; revisión de respuestas de análisis; apoyo para P3 y P5. | `src/integridad.py`: `distancia_hamming_bits()` y `calcular_mac()`; evidencia B.1; respuestas P1, P2, P3, P4 y P5. | Se verificó con pruebas directas de casos idénticos, bits opuestos, longitudes inválidas, HMAC válido e inválido, ejecución de la CLI, consulta de fuentes originales, `py_compile` y `git diff --check`. |
+| Claude (Anthropic) — Cowork | Lectura del repositorio y de la rúbrica para determinar el alcance pendiente; búsqueda y contraste de fuentes sobre Stuxnet; asistencia en la redacción y estructuración de la Parte A. | Secciones A.1 a A.6 del informe (caso Stuxnet). | Se entró a cada URL citada y se verificó que resuelve y que contiene el dato afirmado: dossier de Symantec v1.4 en Broadcom, informes ISIS de dic-2010 y feb-2011, «To Kill a Centrifuge» en langner.com, boletín MS10-046 en Microsoft Learn y CVE-2010-2568 en el NVD del NIST. Se descartaron cifras que no pudieron confirmarse contra una fuente. Se contrastó además la atribución del incidente, que se declara explícitamente como versión periodística y no como hecho establecido. |
 
 **Declaración:**
 
