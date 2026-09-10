@@ -37,15 +37,17 @@
 
 ## A.1 — Cronología
 
-*Máximo 10 líneas. Qué pasó, cuándo, en qué orden. **Cada afirmación con su
-fuente.** Si no encontrás una fuente que lo respalde, no lo escribas.*
-
 | Fecha | Hecho | Fuente |
-|---|---|---|
-| | | |
-| | | |
-| | | |
-
+| Jun. 2009 | Se compila la muestra más antigua conocida de Stuxnet. | Symantec [3] |
+| Fines 2009 – ppios. 2010 | Natanz reemplaza unas 1.000 centrífugas IR-1 de las ~9.000 desplegadas; el OIEA registra 11 cascadas fuera de línea. | ISIS [1] [2] |
+| Mar. 2010 | Aparece la variante que explota CVE-2010-2568: un `.LNK` malicioso ejecuta código con solo mostrarse el ícono. Es el vector que cruza la red aislada por USB. | Symantec [3] |
+| 17 jun. 2010 | VirusBlokAda detecta el gusano y lo reporta como *RootkitTmphider*: descubrimiento público del incidente. | Symantec [3] |
+| 16 y 22 jul. 2010 | VeriSign revoca los certificados robados de Realtek y de JMicron, usados para firmar los drivers del rootkit. | Symantec [3] |
+| 2 ago. 2010 | Microsoft publica MS10-046 fuera del ciclo mensual para corregir CVE-2010-2568. | Microsoft [6] |
+| Sep. 2010 | Se publica el análisis que identifica el objetivo real: los PLC Siemens S7, no las PC Windows. | Langner [4] |
+| Nov. 2010 | Se acota el blanco a variadores de frecuencia que operan entre 807 Hz y 1210 Hz. | Symantec [3] |
+| 2013 | Se documenta una segunda rutina, anterior, contra el S7-417: ataque de sobrepresión que oculta el sabotaje reproduciendo 21 s de lecturas grabadas. | Langner [5] |
+*Los números entre corchetes remiten a la lista de fuentes de A.6.*
 ---
 
 ## A.2 — Activo afectado
