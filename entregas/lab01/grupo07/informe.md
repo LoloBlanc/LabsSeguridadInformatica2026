@@ -1,15 +1,5 @@
 # Laboratorio 01 — Informe
 
-> **Instrucciones de uso de esta plantilla**
->
-> 1. Copiala a `entregas/lab01/grupoXX/informe.md`.
-> 2. Completá **todas** las secciones. Borrá estas instrucciones y todos los
->    textos en *cursiva*, que son consignas, no contenido.
-> 3. No borres los encabezados ni cambies el orden: la corrección los sigue.
-> 4. Si una sección no aplica, escribí por qué no aplica. **No la borres.**
-
----
-
 ## Identificación
 
 | | |
@@ -17,7 +7,6 @@
 | **Grupo** | 07 |
 | **Caso asignado (Parte A)** | 1 — **Stuxnet** (2010), por `7 mod 6 = 1` |
 | **Tema del mini-research** | 2 — La cadena de suministro de software como superficie de ataque (SolarWinds/SUNBURST y Log4Shell) |
-| **Fecha de entrega** | *(antes del inicio de la Clase 2)* |
 
 ### Integrantes
 
@@ -582,8 +571,19 @@ de probar millones de candidatos aumenta considerablemente.
 
 ## Dificultades encontradas
 
-*Qué les costó, dónde se trabaron, qué decidieron y por qué. Esta sección se
-lee y suma. No es relleno: es donde se ve si entendieron el problema.*
+Durante la implementación de la Parte B, la principal dificultad fue distinguir
+la distancia de Hamming sobre los bits crudos del digest de una comparación de
+caracteres hexadecimales. Lo resolvimos trabajando con los bytes obtenidos
+mediante `digest()`, aplicando XOR y contando los bits activos.
+
+También tuvimos que diferenciar los tres estados de la verificación HMAC:
+tag no verificado, tag válido y tag inválido. Para comprobarlo ejecutamos la
+CLI con un tag correcto y otro alterado, y verificamos los códigos de salida.
+
+En la Parte A, la dificultad fue separar confidencialidad, integridad y
+disponibilidad sin marcar automáticamente las tres propiedades por la gravedad
+del incidente. Para resolverlo, vinculamos cada determinación con evidencia
+concreta de Stuxnet y verificamos las fuentes utilizadas.
 
 ---
 
