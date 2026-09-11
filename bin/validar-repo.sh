@@ -43,14 +43,34 @@ else
   ok "no hay solucion.md versionados"
 fi
 
-echo "== 5. Sin flags en claro fuera del entorno ofuscado =="
-# Las flags viven base64 en los targets. En claro solo pueden aparecer en
-# evidencia de labs forenses (caso/) ni en docs públicos.
+echo "== 5. Sin flags REALES en claro en documentación pública =="
+# Las flags viven base64 en los targets. Una flag solo es un problema si es
+# REAL: su SHA-256 figura en algún retos.manifest. Flags de ejemplo
+# (FLAG{ejemplo_...}) son didácticas y no se reportan.
 antes=$errores
 while IFS= read -r f; do
-  fail "flag en claro en doc público: $f"
-done < <(grep -rlE 'FLAG\{[a-z0-9_]{6,}\}' docs README.md CONTRIBUTING.md labs/*/README.md labs/*/docs 2>/dev/null | grep -v entregable || true)
-[ "$errores" -eq "$antes" ] && ok "ninguna flag en claro en documentación pública"
+  fail "flag REAL en claro en doc público: $f"
+done < <(python3 - <<'PY'
+import hashlib, re, pathlib
+# hashes de todas las flags reales del curso
+reales = set()
+for man in pathlib.Path('labs').glob('lab*/retos.manifest'):
+    for linea in man.read_text(errors='ignore').splitlines():
+        if linea.startswith('R'):
+            reales.add(linea.split('|')[2].strip())
+# flags literales en docs públicos
+rutas = ([pathlib.Path('README.md'), pathlib.Path('CONTRIBUTING.md')]
+         + list(pathlib.Path('docs').glob('*.md'))
+         + list(pathlib.Path('labs').glob('lab*/README.md'))
+         + list(pathlib.Path('labs').glob('lab*/docs/*.md')))
+for md in rutas:
+    if not md.exists() or 'entregable' in md.name: continue
+    for flag in re.findall(r'FLAG\{[^}\s]+\}', md.read_text(errors='ignore')):
+        if hashlib.sha256(flag.encode()).hexdigest() in reales:
+            print(f"{md}: {flag}")
+PY
+)
+[ "$errores" -eq "$antes" ] && ok "ninguna flag real en claro en documentación pública"
 
 echo "== 6. Links internos entre .md =="
 antes=$errores
