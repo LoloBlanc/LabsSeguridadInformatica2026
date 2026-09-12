@@ -35,7 +35,6 @@ def romper_xor_1byte(cifrado: bytes) -> tuple[int, bytes]:
     caracteres frecuentes (letras comunes + espacio) y quedate con el mejor.
     Esto demuestra por qué un cifrado clásico de clave corta NO protege nada.
     """
-    # TODO: implementá esto.
     FRECUENTES = b"etaoinshrdlu aeiouEAIOU"
     mejor_clave = 0
     mejor_puntaje = -1
