@@ -26,10 +26,10 @@ echo "== 3. Manifiestos de retos bien formados =="
 antes=$errores
 for m in labs/lab*/retos.manifest; do
   [ -f "$m" ] || continue
-  # cada línea de reto: R<num>|<título>|<64 hex>
+  # cada línea de reto: <ID>|<título>|<64 hex>   (IDs: R1.. o D1.., etc.)
   while IFS= read -r linea; do
     case "$linea" in ''|\#*) continue;; esac
-    echo "$linea" | grep -qE '^R[0-9]+\|[^|]+\|[0-9a-f]{64}$' \
+    echo "$linea" | grep -qE '^[A-Za-z]+[0-9]+\|[^|]+\|[0-9a-f]{64}$' \
       || fail "$m: línea mal formada: ${linea:0:40}..."
   done < "$m"
 done
