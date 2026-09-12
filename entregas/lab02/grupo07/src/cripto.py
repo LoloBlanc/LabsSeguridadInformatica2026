@@ -36,7 +36,18 @@ def romper_xor_1byte(cifrado: bytes) -> tuple[int, bytes]:
     Esto demuestra por qué un cifrado clásico de clave corta NO protege nada.
     """
     # TODO: implementá esto.
-    raise NotImplementedError("Completá romper_xor_1byte()")
+    FRECUENTES = b"etaoinshrdlu aeiouEAIOU"
+    mejor_clave = 0
+    mejor_puntaje = -1
+    mejor_texto = b""
+    for k in range(256):
+        candidato = xor_cifrar(cifrado, bytes([k]))
+        puntaje = sum(1 for b in candidato if b in FRECUENTES)
+        if puntaje > mejor_puntaje:
+            mejor_puntaje = puntaje
+            mejor_clave = k
+            mejor_texto = candidato
+    return (mejor_clave, mejor_texto)
 
 
 # ---------------------------------------------------------------------------
