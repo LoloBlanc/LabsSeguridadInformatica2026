@@ -4,13 +4,33 @@
 
 ## 0. Declaración de uso de IA
 
-Se utilizó el asistente de IA **Claude (Anthropic)**. Siguiendo lo que pide el `CONTRIBUTING.md`:
+Se utilizaron asistentes de IA. Se detallan los aportes y las verificaciones
+siguiendo lo que pide el `CONTRIBUTING.md`:
+
+**Parte A (Guadalupe Gómez — @guadagomezgg8):**
 
 - **Qué herramienta:** Claude (Anthropic).
 - **Qué partes:** la redacción de la Parte A (análisis de timing).
 - **Para qué:** explicación de los conceptos y mejoras en la redacción.
 - **Cómo se verificó:** se corrió `python3 src/verificar.py` (las tres pruebas en verde) y se contrastó el TOTP contra el vector oficial del RFC 6238 (`t=59` → `287082`); el grupo revisó y comprendió el contenido antes de entregarlo.
+- **B.1 (Lautaro Mariño — @lautaromarino0):** el desarrollo original de esta
+  sección corresponde a su commit `0b6e6be`. Durante el armado final, a cargo
+  de Fernando, se utilizó **OpenAI Codex** para revisar las explicaciones de
+  salt, costo de PBKDF2 y diferencias entre algoritmos, y precisar las
+  afirmaciones sobre rendimiento. Esa revisión se contrastó con OWASP,
+  NIST SP 800-63B-4 y el código del grupo. En esta sesión se ejecutaron la
+  autoevaluación, una comparación contra `hashlib.pbkdf2_hmac`, pruebas de
+  contraseñas correctas e incorrectas, salts distintos, parámetros almacenados
+  y el uso de `hmac.compare_digest`.
 - **B.2 (Lorenzo Blanc — @LoloBlanc):** se usó ChatGPT para organizar y redactar la explicación sobre TOTP, sus límites y la comparación con FIDO2/passkeys. Se verificó el vector `t=59` con `src/auth.py` y `src/verificar.py`, y se contrastaron los conceptos con RFC 6238 y las guías de OWASP; el texto fue revisado para confirmar que describe lo que implementa el laboratorio.
+- **Mini-research y armado final (Fernando Cagliero — @Ferca19):** se usó
+  **OpenAI Codex** para investigar y redactar `research.md`, reunir los datos
+  de `INTEGRANTES.md` de la entrega anterior, revisar el informe y preparar
+  el PR. Se consultaron las fuentes primarias de IETF, W3C, FIDO Alliance y
+  NIST; se verificaron los seis vectores SHA-1 del RFC 6238 a seis y ocho
+  dígitos, los límites de ventana, la CLI y la compilación del código. La
+  comparación con WebAuthn es documental. Los detalles reproducibles de
+  las comprobaciones figuran en la bitácora.
 
 ## 1. Parte A — Análisis de la brecha: ataques de timing (caso del grupo 07)
 
@@ -78,7 +98,7 @@ En conclusión, este caso demuestra que no alcanza con que un sistema compare co
 
 ### Fuentes consultadas
 
-1. Coda Hale. *A Lesson In Timing Attacks (or, Don't use MessageDigest.isEqual).* Disponible en: https://codahale.com/a-lesson-in-timing-attacks
+1. Coda Hale. [A Lesson In Timing Attacks (or, Don't use MessageDigest.isEqual)](https://web.archive.org/web/20250103104602/https://codahale.com/a-lesson-in-timing-attacks/). Copia archivada consultada en la revisión final; el dominio original no resolvió DNS.
 
 2. Brumley, D. y Boneh, D. *Remote Timing Attacks are Practical*. 12th USENIX Security Symposium, 2003. Disponible en: https://www.usenix.org/legacy/events/sec03/tech/brumley/brumley_html/index.html
 
@@ -122,27 +142,33 @@ Caso real: **LinkedIn 2012** guardó 6,5 M de hashes **SHA-1 sin salt** → crac
 
 ### B.1.2 — ¿Por qué muchas iteraciones (y no una)?
 
-SHA-256 es **rápido por diseño**, y esa velocidad es justo lo que **no** querés para
-contraseñas. Un atacante con GPUs prueba miles de millones de hashes por segundo: un
-benchmark público de **hashcat en una RTX 4090 ≈ 21.900 MH/s** de SHA-256 (~22 mil
-millones de intentos por segundo, **una sola placa**). Contra un `sha256` pelado, un
-espacio de 8 caracteres `[a-zA-Z0-9]` (62⁸ ≈ 2,18 × 10¹⁴) se agota en **pocas horas**.
+SHA-256 es **rápido por diseño**. Esa velocidad facilita que un atacante con
+GPUs pruebe muchos candidatos contra una base robada; un hash rápido solo no
+es adecuado para almacenar contraseñas. [Fuente 1]
 
-PBKDF2 con N iteraciones aplica HMAC-SHA256 **N veces** por contraseña, encareciendo
-**cada intento** por igual:
+En este registro de 32 bytes, PBKDF2 realiza **200.000 evaluaciones de
+HMAC-SHA256**, frente a una con `iters=1`. El trabajo crece aproximadamente
+en proporción al conteo, comparando el mismo algoritmo y parámetros. Esto
+encarece cada intento del atacante, mientras un login legítimo deriva una
+sola vez. No significa que el ataque tarde exactamente 200.000 veces más que
+con SHA-256 directo: son operaciones distintas y los tiempos dependen del
+hardware y la implementación. La latencia aceptable debe medirse en el
+servidor real. [Fuentes 1 y 3]
 
-- Para el usuario legítimo es **una** verificación → decenas de ms, imperceptible.
-- Para el atacante, multiplica por **200.000** el costo de **cada** prueba del
-  diccionario → lo que tardaba horas pasa a tardar **años**.
+El **factor de costo** se ajusta a medida que mejora el hardware. NIST
+SP 800-63B-4 recomienda elegirlo tan alto como sea práctico sin perjudicar el
+rendimiento del verificador y aumentarlo con el tiempo. [Fuente 2]
 
-Es un **work factor** ajustable: cuando mejora el hardware, se suben las iteraciones.
-NIST SP 800-63B pone un piso histórico de **≥ 10.000**; **OWASP** hoy recomienda
-**600.000** para PBKDF2-HMAC-SHA256. Usamos 200.000 como valor intermedio (se puede
-subir sin romper verificaciones viejas, porque el registro guarda el conteo). Dos
-aclaraciones: las iteraciones **no arreglan una contraseña débil**, solo encarecen el
-ataque (defensa completa = salt + iteraciones + entropía); y PBKDF2 es la opción
-correcta en stdlib / bajo FIPS-140 — con libs externas, OWASP prioriza
-**Argon2id > scrypt > bcrypt** porque además castigan el uso de memoria (GPU-hard).
+Conservamos las **200.000 iteraciones del ejercicio**, aunque OWASP recomienda
+**600.000 para PBKDF2-HMAC-SHA256**. Como el registro guarda el conteo, pueden
+verificarse registros anteriores al aumentar el valor para nuevas altas; la
+migración de los existentes requiere volver a derivar al disponer de la
+contraseña, por ejemplo en el siguiente login. OWASP prioriza Argon2id y luego
+scrypt; reserva bcrypt para sistemas heredados. **Argon2id y scrypt** permiten
+exigir mucha memoria; no corresponde atribuir esa misma propiedad a bcrypt.
+Usar PBKDF2 tampoco certifica por sí solo conformidad FIPS-140: eso depende
+del módulo y su validación. Las iteraciones encarecen el ataque, pero no
+convierten una contraseña débil en fuerte. [Fuente 1]
 
 ### B.1.3 — Verificación en tiempo constante
 
@@ -154,8 +180,8 @@ concreto es menor, pero es la práctica correcta y cuesta cero.
 
 ### Fuentes (B.1)
 
-1. OWASP Foundation. *Password Storage Cheat Sheet* (600.000 iteraciones PBKDF2-HMAC-SHA256; salt único por usuario; orden Argon2id > scrypt > bcrypt > PBKDF2). https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
-2. NIST. *SP 800-63B — Digital Identity Guidelines*, §5.1.1.2 (salt ≥ 32 bits; derivación con factor de costo). https://pages.nist.gov/800-63-3/sp800-63b.html
+1. OWASP Foundation. [Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html) (salt y factores de costo; selección de algoritmos).
+2. NIST. [SP 800-63B-4 — Authentication and Authenticator Management](https://pages.nist.gov/800-63-4/sp800-63b.html), §3.1.1.2 (salt y factor de costo).
 3. RFC 8018 — *PKCS #5: Password-Based Cryptography Specification v2.1* (PBKDF2). https://www.rfc-editor.org/rfc/rfc8018
 4. Python Software Foundation. `hashlib.pbkdf2_hmac`, módulos `hmac` y `secrets`. https://docs.python.org/3/library/hashlib.html
 
@@ -177,7 +203,7 @@ En síntesis, TOTP mitiga el uso de una contraseña robada por sí sola, pero si
 
 1. M'Raihi, D. et al. *RFC 6238: TOTP: Time-Based One-Time Password Algorithm*, especialmente §4 y §5. https://www.rfc-editor.org/rfc/rfc6238
 2. OWASP Foundation. *Multifactor Authentication Cheat Sheet* (límites del MFA, phishing y factores). https://cheatsheetseries.owasp.org/cheatsheets/Multifactor_Authentication_Cheat_Sheet.html
-3. OWASP Foundation. *Phishing-Resistant Authentication Cheat Sheet* (WebAuthn/FIDO2 y resistencia al phishing). https://cheatsheetseries.owasp.org/cheatsheets/Phishing_Resistant_Authentication_Cheat_Sheet.html
+3. W3C. [Web Authentication — Level 2](https://www.w3.org/TR/webauthn-2/#sctn-verifying-assertion), §7.2 (verificación del desafío, origen, RP ID y firma en WebAuthn).
 
 ## 4. Bitácora de comandos
 
@@ -190,7 +216,7 @@ pbkdf2_sha256$200000$dc538a00f7e4ea5a275871c960d31550$b8b0730888dbda948df6721247
 $ python3 src/auth.py hash --password 'Phantom-2026!'
 pbkdf2_sha256$200000$e579108764c609873bcdb3de66e191eb$be9dc16e3239f251c097f805b2f4826cb9fe171b5244f02be5a1af192197eea2
 
-$ python3 src/auth.py verify --password 'Phantom-2026!' --registro 'pbkdf2_sha256$200000$e579108764c609873bcdb3de66e191eb$...'
+$ python3 src/auth.py verify --password 'Phantom-2026!' --registro 'pbkdf2_sha256$200000$e579108764c609873bcdb3de66e191eb$be9dc16e3239f251c097f805b2f4826cb9fe171b5244f02be5a1af192197eea2'
 OK
 
 $ python3 src/auth.py totp --secret 12345678901234567890 --t 59
@@ -204,4 +230,74 @@ $ python3 src/verificar.py
 3 OK / 0 a revisar / 0 sin implementar
 ```
 
-> _(Cada integrante puede sumar acá los comandos que corrió al resolver su parte. El mini-research va en `research.md`, aparte.)_
+### Verificación del armado final — Fernando (@Ferca19)
+
+Entorno: Python 3.12.2 en Windows; se utilizó `python -B` para evitar generar
+archivos `__pycache__` en la entrega. En Linux puede usarse `python3 -B`.
+
+```text
+$ python -B src/verificar.py
+3 OK · 0 a revisar · 0 sin implementar
+
+$ python -B src/auth.py totp --secret 12345678901234567890 --t 59
+287082
+```
+
+También se ejecutaron comprobaciones adicionales con la biblioteca estándar:
+PBKDF2 contra `hashlib`, contraseña UTF-8, salt de 16 bytes y distinto en cada
+alta, rechazo de contraseña y digest incorrectos, registros con parámetros
+propios, registros mal formados y uso de `hmac.compare_digest`. Se probaron los
+subcomandos `hash`, `verify` y `totp`, sus salidas y códigos de retorno,
+incluido el rechazo de una contraseña incorrecta (`FALLO`, código 1).
+
+Los seis vectores **SHA-1** del apéndice B de RFC 6238 pasaron a ocho dígitos
+y con su reducción a seis. No se probaron los modos SHA-256/SHA-512 del RFC:
+`totp()` en este ejercicio usa SHA-1.
+
+| Tiempo Unix | Esperado y obtenido (8 dígitos) | Esperado y obtenido (6 dígitos) |
+|---|---|---|
+| 59 | `94287082` | `287082` |
+| 1111111109 | `07081804` | `081804` |
+| 1111111111 | `14050471` | `050471` |
+| 1234567890 | `89005924` | `005924` |
+| 2000000000 | `69279037` | `279037` |
+| 20000000000 | `65353130` | `353130` |
+
+Para reproducir los vectores desde la carpeta del grupo:
+
+```python
+import sys
+sys.path.insert(0, "src")
+from auth import totp
+
+secret = b"12345678901234567890"
+vectores = [
+    (59, "94287082"),
+    (1111111109, "07081804"),
+    (1111111111, "14050471"),
+    (1234567890, "89005924"),
+    (2000000000, "69279037"),
+    (20000000000, "65353130"),
+]
+for tiempo, esperado in vectores:
+    assert totp(secret, tiempo, digitos=8) == esperado
+    assert totp(secret, tiempo) == esperado[-6:]
+print("6 vectores SHA-1 OK a 6 y 8 dígitos")
+```
+
+Se verificaron además los límites `t=30`, `59` y `60`, un paso configurable
+y el caso de reloj actual con `unittest.mock`. Se comprobó que ambos archivos
+Python compilan. Estas pruebas validan los requisitos del ejercicio; no
+constituyen una auditoría de un servicio de autenticación completo.
+
+Desde la raíz del repositorio se ejecutaron `git diff --check` y
+`bash bin/validar-repo.sh`: ambos pasaron. Para el segundo, Git Bash en
+Windows usó una función `python3` que delega en el mismo Python 3.12.2 y
+`PYTHONPYCACHEPREFIX` apuntó a una carpeta temporal externa al repositorio.
+La validación comprobó compilación, sintaxis shell, manifiestos, ausencia de
+soluciones y flags expuestas, y enlaces internos. Se revisaron los enlaces
+externos: se sustituyó una referencia de OWASP inaccesible por la
+especificación W3C y se enlazó la copia archivada del artículo de Coda Hale.
+También se verificó que los cambios se limitan a `entregas/lab03/grupo07/`
+y que `src/auth.py` y `src/verificar.py` coinciden con los de la rama remota
+recibida antes de comenzar la integración.
