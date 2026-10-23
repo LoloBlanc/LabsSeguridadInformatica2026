@@ -11,7 +11,7 @@ Se utilizó el asistente de IA **Claude (Anthropic)**. Siguiendo lo que pide el 
 - **Para qué:** explicación de las funciones del marco y corrección de redacción del análisis.
 - **Cómo se verificó:** el grupo revisó las correcciones y sugerencias de la IA, las aceptó y comprendió el mapeo.
 - **Lautaro Mariño — Parte B (`src/riesgo.py`, `riesgos.json`, B.1, B.2 y Anexo):** usó Claude (Anthropic) para implementar las tres funciones de `riesgo.py`, buscar fuentes para las cifras de SLE, ARO y costos, y redactar un primer borrador del análisis. **Cómo lo verificó:** corrió `verificar.py` (3/3 en verde) y los ejemplos del enunciado (`20000.00` y `0.875`); recalculó cada ALE y ROI con la CLI de `riesgo.py`; contrastó cada cifra con la fuente citada; y marcó como *supuesto* todo número que no proviene de una fuente.
-- _(Completar cada integrante: usos de IA en la Parte B o el mini-research, si los hubo, y cómo lo verificó.)_
+- **Lorenzo Blanc — B.3:** usó ChatGPT para organizar y redactar la justificación de transferir el riesgo físico R4 mediante un seguro. Verificó que los valores de SLE, ARO y ALE coincidan con `riesgos.json`, revisó que la respuesta no afirme que el seguro elimina el riesgo y comprobó que la sección incluya las limitaciones de la transferencia.
 
 ## 1. Parte A — Marco aplicado
 
