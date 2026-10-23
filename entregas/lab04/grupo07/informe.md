@@ -203,7 +203,9 @@ $ python3 src/riesgo.py roi --antes 75000 --despues 7500 --costo 4440
 
 ### B.3 — Un riesgo a aceptar o transferir
 
-> ⚠️ **PENDIENTE** (a cargo de otro integrante).
+**Transferir R4 — siniestro físico en la oficina.** El escenario estima para este riesgo un SLE de **USD 400.000**, un ARO de **0,01** y, por lo tanto, un ALE de **USD 4.000 por año**. Como la pérdida potencial podría comprometer la continuidad de PhantomCorp, no sería prudente aceptar el riesgo completo. Proponemos transferir parte de su impacto financiero mediante un seguro de propiedad e interrupción del negocio que cubra incendio, inundación o robo y los costos de recuperación de los activos afectados.
+
+La transferencia no evita que ocurra el siniestro ni reemplaza los controles preventivos y los respaldos fuera de la oficina. Además, una póliza puede tener límites, deducibles y exclusiones, y no compensa completamente el tiempo de inactividad, el daño reputacional ni todas las consecuencias de una pérdida de datos. Por eso, la empresa debe revisar que la cobertura y sus condiciones correspondan al escenario; el costo de la prima debe compararse con la pérdida cubierta esperada. Así se transfiere una parte de la carga financiera del riesgo catastrófico mientras se conserva la responsabilidad de reducir su probabilidad y asegurar la recuperación.
 
 ### Fuentes de la Parte B
 
