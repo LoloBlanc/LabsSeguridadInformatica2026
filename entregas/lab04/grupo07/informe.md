@@ -162,9 +162,43 @@ $ python3 src/riesgo.py priorizar --archivo riesgos.json
 
 **¿Qué tan firme es el ranking?** Los ARO son estimaciones, así que los valores absolutos son aproximados. Aun así, los **órdenes de magnitud** se mantienen: R1 a R3 están entre 15.000 y 75.000 USD/año, R4 está en el orden de los miles y R5 en el de las decenas. Para que R4 superara a R3, el ARO del siniestro físico tendría que ser casi 4 veces mayor (0,0375 en lugar de 0,01).
 
-### B.2 — Control para el riesgo n.º 1 y ROI
+### B.2 — Control para el riesgo n.º 1 (R1) y ROI
 
-> ⚠️ **PENDIENTE**.
+**Control propuesto:** MFA obligatoria en el acceso remoto (VPN o escritorio remoto) y en los paneles de administración. Puede implementarse con una aplicación TOTP, como la del Lab 03, o con notificaciones *push* con verificación por número. Corresponde a la categoría **PR.AA** del NIST CSF (debilidad 1 de la Parte A).
+
+**Costo anual estimado:**
+
+| Concepto | Cálculo | USD/año |
+|---|---|---:|
+| Licencias de Duo Essentials | USD 3 por usuario/mes × 40 usuarios × 12 meses [11] | 1.440 |
+| Implementación, enrolamiento y soporte | **Supuesto:** unas 60 h técnicas × USD 50/h | 3.000 |
+| **Total** | | **4.440** |
+
+La edición gratuita de Duo cubre como máximo 10 usuarios [11], por lo que no alcanza para los 40 empleados.
+
+**ALE resultante:** según Microsoft Research, la MFA reduce el riesgo de compromiso un **99,22 %** en general y un **98,56 %** cuando las credenciales ya fueron filtradas [7]. Para no sobrestimar el beneficio, usamos una eficacia del **90 %**, porque la MFA no cubre todos los casos (*phishing* con proxy intermedio, fatiga de notificaciones *push*, vulnerabilidades del propio equipo VPN):
+
+- ARO: 0,3 → **0,03**
+- ALE después del control = 250.000 × 0,03 = **USD 7.500/año**
+
+```text
+$ python3 src/riesgo.py roi --antes 75000 --despues 7500 --costo 4440
+14.203
+```
+
+**ROI = (75.000 − 7.500 − 4.440) / 4.440 ≈ 14,2.** Cada dólar invertido en MFA evita en promedio unos USD 15,20 de pérdida esperada. Descontado el costo del control, quedan USD 14,20 de beneficio neto por cada dólar.
+
+**¿Qué pasa si nos equivocamos con los números?**
+
+| Escenario | ALE antes | ALE después | Costo | ROI (`riesgo.py roi`) |
+|---|---:|---:|---:|---:|
+| Base (eficacia del 90 %) | 75.000 | 7.500 | 4.440 | **14,203** |
+| Eficacia medida por Microsoft (98,56 %) | 75.000 | 1.080 | 4.440 | **15,649** |
+| Pesimista: ARO real de 0,05 en lugar de 0,3, con 90 % de eficacia | 12.500 | 1.250 | 4.440 | **1,534** |
+
+**Punto de equilibrio:** el control se paga si reduce el ALE en al menos USD 4.440 por año. Con nuestros números, eso equivale a una eficacia de apenas **5,9 %**. Visto desde el otro lado, con una eficacia del 90 % alcanza con que R1 tenga un ARO de al menos **0,02** (un incidente cada 50 años).
+
+**Decisión: conviene, con mucho margen.** Además, el ROI calculado es **conservador**, porque no incluye la reducción del ARO de R2: el *ransomware* suele entrar por el mismo acceso remoto. Recomendamos aplicar la MFA primero a los administradores y al acceso remoto, y después extenderla a todo el personal. Para las cuentas con privilegios conviene usar MFA resistente a *phishing* (llaves FIDO2).
 
 ### B.3 — Un riesgo a aceptar o transferir
 
@@ -182,6 +216,7 @@ $ python3 src/riesgo.py priorizar --archivo riesgos.json
 8. Backblaze. *Backblaze Drive Stats for 2025* (12/02/2026): AFR 2025 de 1,36 %. https://www.backblaze.com/blog/backblaze-drive-stats-for-2025/
 9. NFPA Journal, septiembre/octubre de 2013: 3.340 incendios por año en oficinas (promedio 2007–2011). https://nxtbook.com/nxtbooks/nfpa/journal_20130910/index.php?startid=72
 10. U.S. EIA. *Commercial Buildings Energy Consumption Survey (CBECS) 2018*, tabla B4: 970.000 edificios de oficinas. https://www.eia.gov/consumption/commercial/data/2018/bc/html/b4.php
+11. Cisco Duo. *Editions and Pricing*: Free (hasta 10 usuarios), Essentials USD 3, Advantage USD 6 y Premier USD 9 por usuario/mes. https://duo.com/editions-and-pricing
 
 ## 3. Anexo — `riesgos.json`
 
