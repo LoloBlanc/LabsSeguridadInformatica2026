@@ -12,6 +12,19 @@ Se utilizó el asistente de IA **Claude (Anthropic)**. Siguiendo lo que pide el 
 - **Cómo se verificó:** el grupo revisó las correcciones y sugerencias de la IA, las aceptó y comprendió el mapeo.
 - **Lautaro Mariño — Parte B (`src/riesgo.py`, `riesgos.json`, B.1, B.2 y Anexo):** usó Claude (Anthropic) para implementar las tres funciones de `riesgo.py`, buscar fuentes para las cifras de SLE, ARO y costos, y redactar un primer borrador del análisis. **Cómo lo verificó:** corrió `verificar.py` (3/3 en verde) y los ejemplos del enunciado (`20000.00` y `0.875`); recalculó cada ALE y ROI con la CLI de `riesgo.py`; contrastó cada cifra con la fuente citada; y marcó como *supuesto* todo número que no proviene de una fuente.
 - **Lorenzo Blanc — B.3:** usó ChatGPT para organizar y redactar la justificación de transferir el riesgo físico R4 mediante un seguro. Verificó que los valores de SLE, ARO y ALE coincidan con `riesgos.json`, revisó que la respuesta no afirme que el seguro elimina el riesgo y comprobó que la sección incluya las limitaciones de la transferencia.
+- **Fernando Cagliero (@Ferca19) — Mini-research y armado final:** utilizó
+  **OpenAI Codex** para investigar y redactar `research.md` (tema D), revisar
+  la consistencia del conjunto y precisar en B.1 que los respaldos reducen
+  el riesgo y en Parte B que el ROSI expresa una pérdida evitada esperada,
+  recuperar los datos de `INTEGRANTES.md` de
+  la entrega del Lab 03 y preparar el PR. Durante esta sesión se consultaron
+  las fuentes primarias de NIST y ENISA; se ejecutaron `src/verificar.py`,
+  los ejemplos del enunciado y los cálculos del informe y del mini-research.
+  Los resultados se contrastaron con `decimal.Decimal`, el ranking con
+  `riesgos.json` y el anexo con el archivo original. Se probaron además la
+  ausencia de modificaciones a la entrada de `priorizar`, empates, lista vacía,
+  ROI negativo, punto de equilibrio, costo no positivo y salidas de la CLI.
+  Los detalles de verificación del armado final figuran en la sección 4.
 
 ## 1. Parte A — Marco aplicado
 
@@ -118,7 +131,7 @@ $ python3 src/riesgo.py roi --antes 20000 --despues 5000 --costo 8000
 0.875
 ```
 
-El ROI que calcula `roi_control` es el **ROSI** (*Return on Security Investment*) descripto por ENISA: la reducción de la pérdida esperada (ALE sin el control − ALE con el control) menos el costo de la solución, dividido por ese costo [6]. Si el resultado es mayor a 0, el control se paga solo.
+El ROI que calcula `roi_control` es el **ROSI** (*Return on Security Investment*) descripto por ENISA: la reducción de la pérdida esperada (ALE sin el control − ALE con el control) menos el costo de la solución, dividido por ese costo [6]. Si el resultado es mayor a 0, la reducción estimada de pérdidas supera el costo anual; esto no garantiza un ahorro efectivo en un año particular.
 
 ### Supuestos y origen de las cifras
 
@@ -159,7 +172,7 @@ $ python3 src/riesgo.py priorizar --archivo riesgos.json
 - **No coincide en el *ransomware* (2.º).** Esperábamos que encabezara la lista, porque es la amenaza más mencionada. Queda segundo porque tanto su SLE como su ARO son menores que los de R1. Además, R1 y R2 **no son independientes**: una de las formas típicas en que entra un *ransomware* es justamente el acceso remoto con credenciales robadas. Como el ranking evalúa cada riesgo por separado, **subestima el beneficio de cerrar R1**. Para que el *ransomware* pasara al primer lugar, la relación ARO(R1)/ARO(R2) tendría que bajar de 1,5 a menos de 0,72. Es decir, tendríamos que haber sobrestimado el ARO de R1 en más del doble.
 - **No coincide en el servidor web (3.º).** Intuitivamente, lo más visible (el sitio público) parece lo más peligroso. Sin embargo, para atacarlo hace falta que exista una vulnerabilidad explotable. En cambio, el acceso remoto sin MFA solo requiere una contraseña válida. El ALE da más peso a lo que es fácil y frecuente que a lo que más preocupa.
 - **La mayor diferencia aparece en el siniestro físico (4.º).** Tiene el **SLE más alto de la tabla** (400.000, ≈ 16 % de la facturación anual), pero un ALE de solo 4.000 porque su ARO es de 0,01. Esto muestra una limitación del ALE: como es un promedio, trata igual una pérdida de 400.000 cada 100 años que una de 4.000 todos los años. Para una pyme, la primera puede significar el cierre. Por eso, el ALE sirve para **ordenar** los riesgos, pero no alcanza para **decidir** sobre los de baja probabilidad y alto impacto.
-- **Coincide en que R5 queda último.** Una falla de disco no parece grave, y los números lo confirman (27 USD/año). Su peligro real aparece si se combina con otro evento: que el disco falle justo cuando hay que restaurar. La regla 3-2-1 propuesta en la Parte A elimina ese escenario.
+- **Coincide en que R5 queda último.** Una falla de disco no parece grave, y los números lo confirman (27 USD/año). Su peligro real aparece si se combina con otro evento: que el disco falle justo cuando hay que restaurar. La regla 3-2-1 propuesta en la Parte A reduce la dependencia de ese único disco; también hay que probar las restauraciones, porque no elimina toda posibilidad de fallo.
 
 **¿Qué tan firme es el ranking?** Los ARO son estimaciones, así que los valores absolutos son aproximados. Aun así, los **órdenes de magnitud** se mantienen: R1 a R3 están entre 15.000 y 75.000 USD/año, R4 está en el orden de los miles y R5 en el de las decenas. Para que R4 superara a R3, el ARO del siniestro físico tendría que ser casi 4 veces mayor (0,0375 en lugar de 0,01).
 
@@ -234,3 +247,54 @@ Archivo: [`riesgos.json`](riesgos.json). Los nombres van sin tildes a propósito
   {"nombre": "R5 - Falla de hardware del disco de backup (sin redundancia)", "sle": 2000, "aro": 0.0136}
 ]
 ```
+
+## 4. Verificación del armado final — Fernando (@Ferca19)
+
+Entorno: Python 3.12.2 en Windows, únicamente biblioteca estándar. Se utilizó
+`python -B` para evitar generar `__pycache__` en la entrega. En Linux se puede
+usar `python3 -B`.
+
+```text
+$ python -B src/verificar.py
+3 OK · 0 a revisar · 0 sin implementar
+
+$ python -B src/riesgo.py ale --sle 50000 --aro 0.4
+20000.00
+
+$ python -B src/riesgo.py roi --antes 20000 --despues 5000 --costo 8000
+0.875
+
+$ python -B src/riesgo.py priorizar --archivo riesgos.json
+```
+
+El último comando devuelve los cinco riesgos en el orden de B.1, con ALE de
+75.000, 36.000, 15.000, 4.000 y 27,20 USD/año. El anexo JSON coincide con el
+archivo entregado. Los tres ROI de B.2 se reprodujeron con la CLI:
+`14.203`, `15.649` y `1.534`. El caso adicional del mini-research devuelve
+`-0.493` y muestra la dependencia de la decisión respecto de los supuestos.
+
+Las comprobaciones adicionales contrastaron ALE y ROI con `decimal.Decimal`,
+incluidos valores cero, ARO mayor que uno, punto de equilibrio y ROI negativo.
+Se comprobó que `roi_control` rechaza costos cero o negativos, y que
+`priorizar` conserva la entrada, devuelve nuevas filas y resuelve listas
+vacías y empates. Se revisaron compilación, importaciones de stdlib,
+salidas y códigos de retorno de los tres subcomandos y la ayuda.
+
+Estos resultados verifican las operaciones del modelo. Las frecuencias,
+impactos y eficacia del control son estimaciones del ejercicio: que el
+código y sus cuentas sean correctos no los convierte en mediciones reales
+de PhantomCorp. El mini-research desarrolla esa distinción y sus fuentes.
+
+Desde la raíz del repositorio, `git diff --check` y
+`bash bin/validar-repo.sh` pasaron. En Git Bash se usó una función `python3`
+que delega en Python 3.12.2, con `PYTHONPYCACHEPREFIX` dirigido a una carpeta
+temporal externa al repositorio. Se verificaron compilación, shell,
+manifiestos y enlaces internos.
+
+Las cuatro fuentes del mini-research se consultaron directamente. En la
+comprobación de enlaces del informe, la referencia NFPA [9] devolvió
+HTTP 403 y no se pudo reconfirmar su cifra en esta sesión. El ARO de R4
+se considera un supuesto orientativo del grupo, no una tasa medida para
+PhantomCorp: combina referencias de EE. UU. de períodos diferentes y una
+estimación adicional de inundación y robo. Esto no afecta la comprobación
+aritmética de `400000 × 0,01 = 4000`.
