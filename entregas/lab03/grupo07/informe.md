@@ -88,7 +88,76 @@ En conclusión, este caso demuestra que no alcanza con que un sistema compare co
 
 ## 2. Parte B.1 — Contraseñas (por qué salt por usuario, por qué muchas iteraciones)
 
-> ⚠️ **PENDIENTE (responsable de B.1).**
+El código vive en `src/auth.py`: `hash_password()` y `verify_password()`, solo con
+stdlib (`hashlib`, `hmac`, `secrets`). El registro se guarda autodescriptivo:
+
+```
+pbkdf2_sha256$200000$<salt_hex>$<dk_hex>
+```
+
+así la verificación rederiva con los mismos parámetros sin constantes externas.
+Nunca se guarda la contraseña en claro ni un `sha256` pelado. La autoevaluación
+(`python3 src/verificar.py`) da verde en las dos checks de B.1.
+
+### B.1.1 — ¿Por qué salt por usuario?
+
+Un hash sin salt es **determinístico**: la misma contraseña produce siempre el mismo
+digest. Dos usuarios con `123456` quedan con **hashes idénticos** en la base, y eso le
+regala al atacante dos cosas:
+
+1. **Precómputo:** calcula una sola vez una tabla gigante `hash(palabra)` (rainbow
+   tables / diccionarios) y la compara contra **toda la base de golpe**. Crackear a 1
+   o a 1.000.000 de usuarios cuesta casi lo mismo.
+2. **Correlación:** ve de inmediato qué usuarios comparten contraseña (hashes
+   repetidos).
+
+El salt **aleatorio y único por usuario** rompe las dos: como cada registro usa un
+salt distinto, la misma contraseña genera hashes distintos, así que (a) las tablas
+precomputadas quedan inútiles —habría que recomputarlas **por cada salt**— y (b) el
+atacante está obligado a **atacar cada hash por separado**, sin amortizar. El salt
+**no es secreto**: se guarda junto al hash; su valor está en ser **único e
+impredecible**, no en estar oculto. Por eso usamos 16 bytes de un CSPRNG
+(`secrets.token_bytes(16)`, 128 bits), muy por encima del piso de 32 bits de NIST.
+Caso real: **LinkedIn 2012** guardó 6,5 M de hashes **SHA-1 sin salt** → crackeo masivo.
+
+### B.1.2 — ¿Por qué muchas iteraciones (y no una)?
+
+SHA-256 es **rápido por diseño**, y esa velocidad es justo lo que **no** querés para
+contraseñas. Un atacante con GPUs prueba miles de millones de hashes por segundo: un
+benchmark público de **hashcat en una RTX 4090 ≈ 21.900 MH/s** de SHA-256 (~22 mil
+millones de intentos por segundo, **una sola placa**). Contra un `sha256` pelado, un
+espacio de 8 caracteres `[a-zA-Z0-9]` (62⁸ ≈ 2,18 × 10¹⁴) se agota en **pocas horas**.
+
+PBKDF2 con N iteraciones aplica HMAC-SHA256 **N veces** por contraseña, encareciendo
+**cada intento** por igual:
+
+- Para el usuario legítimo es **una** verificación → decenas de ms, imperceptible.
+- Para el atacante, multiplica por **200.000** el costo de **cada** prueba del
+  diccionario → lo que tardaba horas pasa a tardar **años**.
+
+Es un **work factor** ajustable: cuando mejora el hardware, se suben las iteraciones.
+NIST SP 800-63B pone un piso histórico de **≥ 10.000**; **OWASP** hoy recomienda
+**600.000** para PBKDF2-HMAC-SHA256. Usamos 200.000 como valor intermedio (se puede
+subir sin romper verificaciones viejas, porque el registro guarda el conteo). Dos
+aclaraciones: las iteraciones **no arreglan una contraseña débil**, solo encarecen el
+ataque (defensa completa = salt + iteraciones + entropía); y PBKDF2 es la opción
+correcta en stdlib / bajo FIPS-140 — con libs externas, OWASP prioriza
+**Argon2id > scrypt > bcrypt** porque además castigan el uso de memoria (GPU-hard).
+
+### B.1.3 — Verificación en tiempo constante
+
+`verify_password` compara con `hmac.compare_digest`, que **no corta en el primer byte
+distinto**. Una comparación ingenua (`==`) puede retornar antes y filtrar, por el
+tiempo, cuántos bytes iniciales coincidían (ataque de *timing*, el caso de la Parte A).
+Acá comparamos digests derivados y no la contraseña en claro, así que el riesgo
+concreto es menor, pero es la práctica correcta y cuesta cero.
+
+### Fuentes (B.1)
+
+1. OWASP Foundation. *Password Storage Cheat Sheet* (600.000 iteraciones PBKDF2-HMAC-SHA256; salt único por usuario; orden Argon2id > scrypt > bcrypt > PBKDF2). https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
+2. NIST. *SP 800-63B — Digital Identity Guidelines*, §5.1.1.2 (salt ≥ 32 bits; derivación con factor de costo). https://pages.nist.gov/800-63-3/sp800-63b.html
+3. RFC 8018 — *PKCS #5: Password-Based Cryptography Specification v2.1* (PBKDF2). https://www.rfc-editor.org/rfc/rfc8018
+4. Python Software Foundation. `hashlib.pbkdf2_hmac`, módulos `hmac` y `secrets`. https://docs.python.org/3/library/hashlib.html
 
 ## 3. Parte B.2 — TOTP (por qué frena el robo de contraseña; qué NO protege)
 
