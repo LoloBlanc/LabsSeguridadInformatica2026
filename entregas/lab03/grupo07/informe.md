@@ -10,7 +10,7 @@ Se utilizó el asistente de IA **Claude (Anthropic)**. Siguiendo lo que pide el 
 - **Qué partes:** la redacción de la Parte A (análisis de timing).
 - **Para qué:** explicación de los conceptos y mejoras en la redacción.
 - **Cómo se verificó:** se corrió `python3 src/verificar.py` (las tres pruebas en verde) y se contrastó el TOTP contra el vector oficial del RFC 6238 (`t=59` → `287082`); el grupo revisó y comprendió el contenido antes de entregarlo.
-- _(Completar cada integrante: otros usos de IA en B.1, B.2 o el mini-research, si los hubo, y cómo lo verificó.)_
+- **B.2 (Lorenzo Blanc — @LoloBlanc):** se usó ChatGPT para organizar y redactar la explicación sobre TOTP, sus límites y la comparación con FIDO2/passkeys. Se verificó el vector `t=59` con `src/auth.py` y `src/verificar.py`, y se contrastaron los conceptos con RFC 6238 y las guías de OWASP; el texto fue revisado para confirmar que describe lo que implementa el laboratorio.
 
 ## 1. Parte A — Análisis de la brecha: ataques de timing (caso del grupo 07)
 
@@ -161,7 +161,23 @@ concreto es menor, pero es la práctica correcta y cuesta cero.
 
 ## 3. Parte B.2 — TOTP (por qué frena el robo de contraseña; qué NO protege)
 
-> ⚠️ **PENDIENTE (responsable de B.2).**
+### B.2.1 — ¿Por qué el TOTP frena el robo de una contraseña?
+
+La contraseña es un factor de autenticación basado en **algo que se sabe**. TOTP agrega un segundo factor basado en **algo que se tiene**: un autenticador que comparte un secreto con el servidor. A partir de ese secreto y del tiempo actual, ambos calculan un código de un solo uso que cambia cada 30 segundos. Por eso, si alguien obtiene únicamente la contraseña —por ejemplo, mediante reutilización o una filtración— no puede calcular el código vigente sin obtener también el secreto del segundo factor. El servidor exige ambos factores y rechaza el inicio de sesión si falta el código correcto.
+
+En esta implementación, `totp()` convierte el tiempo en un contador con `t // 30` y lo entrega a HOTP. El vector oficial del RFC 6238 confirma el cálculo: para el secreto ASCII `12345678901234567890` y `t=59`, el código de seis dígitos es `287082` (los ocho dígitos del vector son `94287082`). Esto valida el cálculo, aunque por sí solo no demuestra que toda implementación de autenticación o recuperación de cuenta sea segura.
+
+### B.2.2 — ¿Qué NO protege el TOTP?
+
+TOTP **no evita el phishing en tiempo real**: una víctima puede ingresar el código en una página falsa y el atacante reenviarlo al sitio legítimo antes de que venza la ventana. Tampoco protege si malware controla el teléfono o lee el código, si se roba el secreto compartido guardado por el servidor, ni si se secuestra una sesión después de que la víctima ya inició sesión. Además, si el secreto se copia, puede generarse el mismo código desde otro dispositivo; el código temporal no vuelve secreto al secreto compartido.
+
+En síntesis, TOTP mitiga el uso de una contraseña robada por sí sola, pero sigue siendo **susceptible al phishing**. FIDO2/WebAuthn con passkeys vincula criptográficamente la autenticación al sitio legítimo y no entrega un código reutilizable que una página falsa pueda retransmitir; por eso ofrece resistencia al phishing que TOTP no proporciona.
+
+### Fuentes (B.2)
+
+1. M'Raihi, D. et al. *RFC 6238: TOTP: Time-Based One-Time Password Algorithm*, especialmente §4 y §5. https://www.rfc-editor.org/rfc/rfc6238
+2. OWASP Foundation. *Multifactor Authentication Cheat Sheet* (límites del MFA, phishing y factores). https://cheatsheetseries.owasp.org/cheatsheets/Multifactor_Authentication_Cheat_Sheet.html
+3. OWASP Foundation. *Phishing-Resistant Authentication Cheat Sheet* (WebAuthn/FIDO2 y resistencia al phishing). https://cheatsheetseries.owasp.org/cheatsheets/Phishing_Resistant_Authentication_Cheat_Sheet.html
 
 ## 4. Bitácora de comandos
 
