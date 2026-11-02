@@ -14,9 +14,21 @@
 
 **Lorenzo Blanc — Parte A (operador):** se utilizó **Codex (OpenAI)** para preparar y operar el entorno Docker de la cátedra, ejecutar las herramientas de enumeración, organizar sus salidas y redactar la parte práctica, la bitácora y P1. La validación se realiza contra las respuestas HTTP y las salidas reales de las herramientas, con cada flag comprobada mediante `./ctf submit 06` y el estado final mediante `./ctf status 06`. No se obtienen flags leyendo el código del target ni `solucion.md`. Los ejemplos del Lab 05 se atribuyen al reconocimiento de Guadalupe ya documentado por el grupo.
 
-**Coordinación:** Lorenzo realiza la Parte A indicada para este aporte. El reparto original la asignaba a Fernando; las demás partes quedan pendientes de sus responsables y de la coordinación del grupo.
+**Coordinación:** Lorenzo realiza la Parte A (operador) y Fernando la Parte C
+(inventario de R3, R4 y R5, y P3), según el intercambio acordado por el grupo.
+Las partes B y D conservan los responsables del reparto original.
 
-**Resto de integrantes:** pendiente de completar su declaración al incorporar sus aportes.
+**Fernando Cagliero — Parte C (inventario R3–R5):** se utilizó **OpenAI Codex**
+para analizar las capturas de Lorenzo y redactar las tres filas del inventario.
+Se contrastaron métodos, estado HTTP, cuentas y roles, CMS, versión, build y
+ruta del archivo default con los archivos originales de `evidencia/`. Se
+consultaron las fuentes primarias de IETF, OWASP y WhatWeb para distinguir
+hallazgos observados de riesgos y comprobaciones pendientes. La revisión es
+documental: no se repitió la operación del contenedor ni se atribuyen a
+Fernando las capturas o las flags de Lorenzo.
+
+**Lautaro y Guadalupe:** pendiente de completar sus declaraciones al
+incorporar las partes B y D, respectivamente.
 
 ## 1. Flags capturadas
 
@@ -46,15 +58,16 @@ Las respuestas prueban exposición y enumeración. No se intentó subir una webs
 
 ## 2. Inventario de enumeración
 
-Pendiente de las partes B y C. La evidencia de la Parte A se adjunta en `evidencia/` para completar las filas sin inventar hallazgos.
+Parte B pendiente. Las filas R3, R4 y R5 de la Parte C se completaron a partir
+de las capturas originales de Lorenzo adjuntas en `evidencia/`.
 
 | Hallazgo | Ruta/Método | Técnica | Evidencia | Riesgo | ¿Qué habilita para el Lab 07? |
 |---|---|---|---|---|---|
 | R1 — Directorios | Pendiente | Pendiente | Pendiente | Pendiente | Pendiente |
 | R2 — Repositorio Git | Pendiente | Pendiente | Pendiente | Pendiente | Pendiente |
-| R3 — Métodos HTTP | Pendiente | Pendiente | Pendiente | Pendiente | Pendiente |
-| R4 — API de usuarios | Pendiente | Pendiente | Pendiente | Pendiente | Pendiente |
-| R5 — Fingerprinting | Pendiente | Pendiente | Pendiente | Pendiente | Pendiente |
+| R3 — Métodos HTTP anunciados | `OPTIONS /` sobre HTTP/80; `PUT` y `DELETE` en `Allow`. | `curl -sS -X OPTIONS -i http://phantomcorp/`, ejecutado por Lorenzo. | [06-options.txt](evidencia/06-options.txt): `HTTP/1.0 200 OK` y `Allow: GET, POST, PUT, DELETE, OPTIONS`. | Posible creación, modificación o borrado no autorizado si esos métodos se aceptan sin controles adecuados. Una webshell requeriría además escritura en una ruta ejecutable; el anuncio de métodos no demuestra esas condiciones. | Dirigir la validación de autorización y escritura a las rutas pertinentes, inicialmente con un archivo inerte y recuperando su contenido. Evaluar ejecución solo si se demuestra que la ubicación procesa código; no se probó en este lab. |
+| R4 — API interna que divulga cuentas y roles | `GET /api/users` sobre HTTP/80. | Consulta con `curl -sS -i http://phantomcorp/api/users`, sin credenciales en el comando registrado. | [07-api-users.txt](evidencia/07-api-users.txt): HTTP 200, JSON con `admin`/`superuser`, `jperez`/`editor` y `mgomez`/`viewer`; nota `endpoint interno de RRHH - no exponer`. | Divulgación de cuentas válidas y privilegios declarados, útil para seleccionar objetivos. La respuesta no muestra contraseñas ni demuestra acceso como esos usuarios. | Preparar pruebas de autenticación dirigidas a usuarios existentes, incluida la cuenta administrativa, y evaluar controles frente a fuerza bruta o credential stuffing. La enumeración no demuestra que esas técnicas tengan éxito. |
+| R5 — Identificación del CMS y archivo default público | `GET /` y `GET /phantomcms/VERSION` sobre HTTP/80. | `whatweb`, contraste con el HTML y enumeración dirigida mediante `dirb`; confirmación con `curl`. | [08-whatweb.txt](evidencia/08-whatweb.txt): `MetaGenerator[PhantomCMS 3.7]`, `X-Powered-By[PhantomCMS/3.7]`; [14-dirb-cms.txt](evidencia/14-dirb-cms.txt) encontró la ruta, y [15-cms-version.txt](evidencia/15-cms-version.txt) devolvió HTTP 200 con `PhantomCMS 3.7 (build 2024-11)`. | Fuga de producto, versión y build, y confirmación de un archivo default accesible que permite afinar la enumeración. Identificar el CMS no prueba una vulnerabilidad explotable. | Orientar la búsqueda de archivos y configuraciones del producto identificado y verificar su aplicabilidad. PhantomCMS es ficticio en el lab: no se le atribuye un CVE real; una coincidencia de versión, por sí sola, no autoriza a afirmar explotación. |
 
 ## 3. Preguntas de análisis
 
