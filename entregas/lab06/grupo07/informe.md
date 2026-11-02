@@ -18,14 +18,16 @@
 (inventario de R3, R4 y R5, y P3), según el intercambio acordado por el grupo.
 Las partes B y D conservan los responsables del reparto original.
 
-**Fernando Cagliero — Parte C (inventario R3–R5):** se utilizó **OpenAI Codex**
-para analizar las capturas de Lorenzo y redactar las tres filas del inventario.
+**Fernando Cagliero — Parte C (inventario R3–R5 y P3):** se utilizó **OpenAI Codex**
+para analizar las capturas de Lorenzo, redactar las tres filas del inventario
+y explicar en P3 el escenario de una webshell subida mediante `PUT`.
 Se contrastaron métodos, estado HTTP, cuentas y roles, CMS, versión, build y
 ruta del archivo default con los archivos originales de `evidencia/`. Se
 consultaron las fuentes primarias de IETF, OWASP y WhatWeb para distinguir
 hallazgos observados de riesgos y comprobaciones pendientes. La revisión es
 documental: no se repitió la operación del contenedor ni se atribuyen a
-Fernando las capturas o las flags de Lorenzo.
+Fernando las capturas o las flags de Lorenzo. Las comprobaciones adicionales
+de documentos y evidencias se detallan al final de la sección 4.
 
 **Lautaro y Guadalupe:** pendiente de completar sus declaraciones al
 incorporar las partes B y D, respectivamente.
@@ -87,7 +89,47 @@ Pendiente — Parte B.
 
 **P3 — El método `PUT`.**
 
-Pendiente — Parte C.
+En R3, [06-options.txt](evidencia/06-options.txt) registra `OPTIONS /` con
+`Allow: GET, POST, PUT, DELETE, OPTIONS`. Según RFC 9110, `Allow` anuncia los
+métodos asociados al recurso y `PUT` solicita crear o reemplazar su estado;
+no define que ese estado deba ser un archivo en disco. Por eso, que aparezca
+`PUT` no prueba una subida sin autenticación ni es una vulnerabilidad por sí
+solo: puede ser legítimo en una API con autorización adecuada [C1].
+
+**Ataque concreto posible, no ejecutado en este lab:** supongamos una
+configuración que acepta escritura sin autorización en una ruta pública y
+que ejecuta PHP en ella. Ruta e intérprete son supuestos del ejemplo, no
+hallazgos del fingerprint de PhantomCMS.
+
+1. El atacante envía `PUT /uploads/diagnostico.php` con una **webshell** como
+   contenido: un script que recibe instrucciones y las ejecuta en el servidor.
+2. El servidor acepta la petición y guarda ese contenido en una ubicación
+   que el atacante puede solicitar por HTTP. Para afirmar una escritura real
+   habría que comprobar el resultado, no solo un código de respuesta exitoso.
+3. El atacante solicita `GET /uploads/diagnostico.php`. **Si** esa ubicación
+   procesa PHP en lugar de servirlo como texto, el intérprete ejecuta la
+   webshell con los permisos del proceso web. Podría acceder a datos de la
+   aplicación o modificar recursos dentro de esos permisos; no implica
+   automáticamente acceso de administrador [C2].
+
+OWASP recomienda contrastar los métodos anunciados con su comportamiento y
+verificar la recuperación del recurso escrito. Para el Lab 07, el primer paso
+sería una comprobación autorizada con un archivo inerte y su recuperación,
+antes de evaluar las condiciones de ejecución. En la evidencia actual solo
+hay `OPTIONS`: no se probó escritura, la ruta del ejemplo ni ejecución.
+Si se permitiera escritura arbitraria pero no ejecución, aún podría haber
+alteración de contenido; el impacto debe ajustarse a lo que se demuestre [C2].
+
+**Fuentes de la Parte C:**
+
+- **[C1]** IETF. [RFC 9110, §9.3.4 — PUT](https://www.rfc-editor.org/rfc/rfc9110.html#name-put)
+  y [§10.2.1 — Allow](https://www.rfc-editor.org/rfc/rfc9110.html#name-allow).
+- **[C2]** OWASP WSTG v4.2. [Test HTTP Methods](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/06-Test_HTTP_Methods/).
+  Enumeración de métodos, comprobación de escritura e impacto potencial.
+- **[C3]** OWASP WSTG v4.2. [Testing for Account Enumeration and Guessable User Account](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/03-Identity_Management_Testing/04-Testing_for_Account_Enumeration_and_Guessable_User_Account/).
+  Utilidad de las cuentas válidas para dirigir pruebas de autenticación (R4).
+- **[C4]** WhatWeb. [Documentación oficial](https://github.com/urbanadventurer/WhatWeb/blob/master/README.md).
+  Identificación de tecnologías y versiones a partir de indicios de las respuestas (R5).
 
 **P4 — Enumeración de usuarios.**
 
@@ -162,3 +204,25 @@ Para repetir los envíos en un checkout Unix con el motor oficial disponible, de
 ```
 
 La copia del motor, `.loot/` y `.progreso/` quedan locales y no se versionan. Las salidas relevantes se copiaron a `evidencia/`, dentro del directorio del grupo, para que el inventario pueda verificarse desde el repositorio.
+
+### Revisión de la Parte C — Fernando, 02/11/2026
+
+Se revisaron los archivos originales `06-options.txt`, `07-api-users.txt`,
+`08-whatweb.txt`, `09-index.txt`, `14-dirb-cms.txt` y `15-cms-version.txt`.
+Se contrastaron el header `Allow`, los tres usuarios y roles del JSON,
+los indicios de WhatWeb y la versión/build del archivo default. Se conservaron
+los bytes de todas las evidencias, las flags, P1 y la bitácora del operador.
+
+Se comprobó la estructura Markdown, las seis columnas de cada fila del
+inventario, la existencia de los enlaces locales y las fuentes oficiales.
+La sintaxis de los bloques bash se revisó con `bash -n`, sin ejecutarlos.
+Desde la raíz del repositorio se ejecutaron `git diff --check` y
+`bash bin/validar-repo.sh`; los resultados de la validación corresponden a
+compilación, sintaxis, manifiestos y documentación, no a nuevas operaciones
+de enumeración o explotación. Ambos comandos finalizaron sin errores; la
+validación general informó `VALIDACIÓN: todo OK`.
+
+Entorno de revisión: Python 3.12.2 y Git Bash en Windows, solo biblioteca
+estándar. Para la validación general se usó una función `python3` que delega
+en el Python instalado, con la caché dirigida a una carpeta temporal externa
+al repositorio.
