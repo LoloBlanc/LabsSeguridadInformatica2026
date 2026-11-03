@@ -60,13 +60,15 @@ Las respuestas prueban exposición y enumeración. No se intentó subir una webs
 
 ## 2. Inventario de enumeración
 
-Parte B pendiente. Las filas R3, R4 y R5 de la Parte C se completaron a partir
+Las filas R1 y R2 (Parte B, Lautaro) se basan en las capturas de Lorenzo y en una
+enumeración complementaria adjunta como `evidencia/20` a `23` (ver sección 4).
+Las filas R3, R4 y R5 de la Parte C se completaron a partir
 de las capturas originales de Lorenzo adjuntas en `evidencia/`.
 
 | Hallazgo | Ruta/Método | Técnica | Evidencia | Riesgo | ¿Qué habilita para el Lab 07? |
 |---|---|---|---|---|---|
-| R1 — Directorios | Pendiente | Pendiente | Pendiente | Pendiente | Pendiente |
-| R2 — Repositorio Git | Pendiente | Pendiente | Pendiente | Pendiente | Pendiente |
+| R1 — Directorio de backups con listado público | `GET /backup/` sobre HTTP/80; además `GET /admin` → 403. | `dirb` con `common.txt` (4612 rutas), ejecutado por Lorenzo, y confirmación con `curl -sS -i http://phantomcorp/backup/`. Luego, `curl` a cada archivo del listado y a `/admin`. | [03-dirb.txt](evidencia/03-dirb.txt): `+ http://phantomcorp/backup (CODE:200\|SIZE:249)` y `+ http://phantomcorp/admin (CODE:403\|SIZE:65)`. [04-backup.txt](evidencia/04-backup.txt): `Index of /backup` con `respaldo-db-2024.sql.gz`, `config.old` y `notas-infra.txt`. [21-backup-archivos.txt](evidencia/21-backup-archivos.txt): los tres archivos responden **404**; `/admin` responde 403 con `Panel admin. Necesitas credenciales.` | Listado de directorio expuesto (CWE-548) [B1]: revela que en el web root hay un volcado de base de datos y una configuración vieja, archivos que en un caso real suelen contener datos y credenciales en claro [B2]. **En este lab los archivos no se sirven**: lo confirmado es la fuga de nombres y de la existencia de respaldos, no la descarga de datos. El 403 confirma que existe un panel administrativo con autenticación. | Junto con R4 define el blanco de autenticación: `/admin` con la cuenta `admin` (superuser). Los nombres exactos del listado permiten probar variantes dirigidas (`.bak`, otras extensiones de compresión, rutas hermanas) en lugar de fuerza bruta a ciegas; si un respaldo se pudiera descargar, sería la vía más directa a credenciales. Con la evidencia actual no habilita acceso directo. |
+| R2 — Metadatos de repositorio Git expuestos | `GET /.git/config` sobre HTTP/80. | Pedido directo de un archivo conocido de Git con `curl -sS -i` (Lorenzo). Enumeración complementaria: `curl` a las rutas estándar de `.git` que usan las herramientas de volcado y el script NSE `http-git`. | [05-git-config.txt](evidencia/05-git-config.txt): HTTP 200 con `[remote "origin"]` y `url = https://git.internal.phantomcorp/intranet.git`. [22-git-artefactos.txt](evidencia/22-git-artefactos.txt): `/.git/`, `HEAD`, `index`, `logs/HEAD`, `refs/heads/main`, `refs/heads/master` y `packed-refs` responden **404**. [23-nmap-http-git.txt](evidencia/23-nmap-http-git.txt): `http-git` no reporta repositorio, porque abandona si `/.git/HEAD` no responde [B6]. | Exposición de un repositorio de control de versiones (CWE-527) [B3]. Confirmado: el host Git interno y el nombre del repositorio (`intranet.git`), útiles para mapear infraestructura interna. La URL no trae credenciales embebidas. **No confirmado:** sin `HEAD` ni refs no hay commit por donde empezar, así que desde este servidor no se puede reconstruir código ni historia (ver P2). | Señala el repositorio de la intranet como fuente de código y secretos para el Lab 07: si `HEAD` y `objects/` quedaran accesibles, se podría reconstruir con `git-dumper` y pasar a análisis de caja blanca de `/admin` y `/api/users` [B4]. El host `git.internal.phantomcorp` queda **fuera de alcance** salvo autorización explícita; no se consultó. |
 | R3 — Métodos HTTP anunciados | `OPTIONS /` sobre HTTP/80; `PUT` y `DELETE` en `Allow`. | `curl -sS -X OPTIONS -i http://phantomcorp/`, ejecutado por Lorenzo. | [06-options.txt](evidencia/06-options.txt): `HTTP/1.0 200 OK` y `Allow: GET, POST, PUT, DELETE, OPTIONS`. | Posible creación, modificación o borrado no autorizado si esos métodos se aceptan sin controles adecuados. Una webshell requeriría además escritura en una ruta ejecutable; el anuncio de métodos no demuestra esas condiciones. | Dirigir la validación de autorización y escritura a las rutas pertinentes, inicialmente con un archivo inerte y recuperando su contenido. Evaluar ejecución solo si se demuestra que la ubicación procesa código; no se probó en este lab. |
 | R4 — API interna que divulga cuentas y roles | `GET /api/users` sobre HTTP/80. | Consulta con `curl -sS -i http://phantomcorp/api/users`, sin credenciales en el comando registrado. | [07-api-users.txt](evidencia/07-api-users.txt): HTTP 200, JSON con `admin`/`superuser`, `jperez`/`editor` y `mgomez`/`viewer`; nota `endpoint interno de RRHH - no exponer`. | Divulgación de cuentas válidas y privilegios declarados, útil para seleccionar objetivos. La respuesta no muestra contraseñas ni demuestra acceso como esos usuarios. | Preparar pruebas de autenticación dirigidas a usuarios existentes, incluida la cuenta administrativa, y evaluar controles frente a fuerza bruta o credential stuffing. La enumeración no demuestra que esas técnicas tengan éxito. |
 | R5 — Identificación del CMS y archivo default público | `GET /` y `GET /phantomcms/VERSION` sobre HTTP/80. | `whatweb`, contraste con el HTML y enumeración dirigida mediante `dirb`; confirmación con `curl`. | [08-whatweb.txt](evidencia/08-whatweb.txt): `MetaGenerator[PhantomCMS 3.7]`, `X-Powered-By[PhantomCMS/3.7]`; [14-dirb-cms.txt](evidencia/14-dirb-cms.txt) encontró la ruta, y [15-cms-version.txt](evidencia/15-cms-version.txt) devolvió HTTP 200 con `PhantomCMS 3.7 (build 2024-11)`. | Fuga de producto, versión y build, y confirmación de un archivo default accesible que permite afinar la enumeración. Identificar el CMS no prueba una vulnerabilidad explotable. | Orientar la búsqueda de archivos y configuraciones del producto identificado y verificar su aplicabilidad. PhantomCMS es ficticio en el lab: no se le atribuye un CVE real; una coincidencia de versión, por sí sola, no autoriza a afirmar explotación. |
@@ -226,3 +228,24 @@ Entorno de revisión: Python 3.12.2 y Git Bash en Windows, solo biblioteca
 estándar. Para la validación general se usó una función `python3` que delega
 en el Python instalado, con la caché dirigida a una carpeta temporal externa
 al repositorio.
+
+### Enumeración complementaria de la Parte B — Lautaro, 02/11/2026
+
+Para fundamentar R1, R2 y P2 se profundizó sobre `/backup` y `.git`. **Entorno distinto al de la Parte A:** sandbox Linux sin Docker, asistido por Claude (ver sección 0). Se ejecutó sin modificaciones el target oficial `labs/lab06-enumeracion-de-servicios/entorno/phantomcorp/server.py` con `python3`, que es el mismo `CMD` de su Dockerfile, y `phantomcorp` se resolvió a `127.0.0.1` con una entrada en `/etc/hosts`. No se leyó el código del target ni se consultó el host Git interno. Herramientas: curl y Nmap 7.94SVN. Hora del sandbox: `2026-11-03T01:30:03+00:00`, es decir 02/11/2026 22:30 (UTC−3).
+
+```bash
+date -Is | tee 20-fecha-parte-b.txt
+# R1: ¿se pueden bajar los archivos del listado? ¿qué responde /admin?
+for p in /backup/ /backup/respaldo-db-2024.sql.gz /backup/config.old /backup/notas-infra.txt /admin /admin/; do
+  echo "=== GET $p"; curl -sS -i --max-time 5 "http://phantomcorp$p"; echo
+done | tee 21-backup-archivos.txt
+# R2: ¿qué más del .git está expuesto, además de config?
+for p in /.git/ /.git/config /.git/HEAD /.git/index /.git/logs/HEAD /.git/refs/heads/main \
+         /.git/refs/heads/master /.git/packed-refs /.git/description /.git/COMMIT_EDITMSG \
+         /.git/ORIG_HEAD /.gitignore; do
+  echo "=== GET $p"; curl -sS -i --max-time 5 "http://phantomcorp$p" | head -15; echo
+done | tee 22-git-artefactos.txt
+nmap -Pn -p80 --script http-git phantomcorp -oN 23-nmap-http-git.txt
+```
+
+Resultados: el listado de `/backup/` y el contenido de `/.git/config` coinciden con las capturas de Lorenzo. Lo nuevo: los tres archivos del listado dan 404, `/admin` da 403, y de las doce rutas de Git solo `/.git/config` responde 200. Los archivos se adjuntan con los fines de línea CRLF de HTTP normalizados a LF.
