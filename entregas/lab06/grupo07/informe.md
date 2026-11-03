@@ -29,8 +29,9 @@ documental: no se repitió la operación del contenedor ni se atribuyen a
 Fernando las capturas o las flags de Lorenzo. Las comprobaciones adicionales
 de documentos y evidencias se detallan al final de la sección 4.
 
-**Lautaro y Guadalupe:** pendiente de completar sus declaraciones al
-incorporar las partes B y D, respectivamente.
+**Lautaro Mariño — Parte B (inventario R1–R2 y P2):** se utilizó **Claude (Anthropic)** como asistente, en dos aspectos. **Redacción:** ayudó a redactar las filas R1 y R2, P2 y la sección correspondiente de la bitácora a partir del análisis que hizo Lautaro de las capturas de Lorenzo (`03`, `04` y `05`); Lautaro revisó y ajustó cada texto antes de commitearlo. **Contraste de pruebas:** sirvió de soporte para contrastar algunas de las pruebas, mediante una enumeración complementaria contra el target oficial del Lab 06 en un sandbox Linux sin Docker (`evidencia/20` a `23`), y para ubicar y cotejar las fuentes (MITRE CWE, OWASP WSTG, documentación de Git, git-dumper y Nmap). **Verificación:** cada afirmación de las filas remite a una línea de evidencia; las respuestas nuevas (404 de los archivos de `/backup` y de `HEAD`/`index`/`refs`) se capturaron con `curl` y se adjuntan. El comportamiento de `http-git` se comprobó en el código del script. No se consultó `git.internal.phantomcorp` ni ningún tercero, no se leyó el código del target ni `solucion.md`, y no se atribuyen a Lautaro las capturas ni las flags de Lorenzo.
+
+**Guadalupe:** pendiente de completar su declaración al incorporar la parte D.
 
 ## 1. Flags capturadas
 
