@@ -87,7 +87,26 @@ Las etapas se complementan y sus técnicas pueden superponerse: el fingerprintin
 
 **P2 — El `.git` expuesto.**
 
-Pendiente — Parte B.
+Un `.git` no es "un archivo de más": es la base de datos completa del proyecto. Git guarda cada versión de cada archivo como objetos en `objects/`, los encadena mediante commits y marca la rama actual con `HEAD` y `refs/`; `logs/` registra los movimientos de cada ref [B5]. Si esas piezas se pueden pedir por HTTP, un atacante reconstruye:
+
+1. **El código fuente actual** de la intranet, incluidos archivos que el servidor nunca muestra: configuración, scripts de despliegue, consultas a la base.
+2. **Toda la historia:** autores y sus emails, fechas, mensajes y cada versión anterior. Una contraseña o API key que se borró en un commit posterior sigue en los objetos viejos.
+3. **Datos de infraestructura:** remotos, ramas y rutas internas.
+
+No hace falta que el servidor liste directorios. `git-dumper` pide los archivos conocidos (`HEAD`, `index`, `config`, `packed-refs`, `logs/HEAD`), extrae de ellos refs y hashes, baja los objetos siguiendo el padre de cada commit y termina con `git checkout .` [B4]. Por eso es más grave que un archivo suelto: desde un punto de entrada se recorre todo el grafo, y el atacante pasa a auditar en caja blanca la autenticación de `/admin`, el endpoint `/api/users` o las credenciales de la base. MITRE lo clasifica como CWE-527 y la mitigación es sacar el repositorio del servidor de producción [B3].
+
+**Qué muestra nuestra evidencia.** `GET /.git/config` devolvió 200 con el remoto `https://git.internal.phantomcorp/intranet.git` ([05-git-config.txt](evidencia/05-git-config.txt)). Para medir hasta dónde llegaba la exposición se pidieron las rutas estándar de un repositorio, incluidas todas las que `git-dumper` usa para encontrar refs y hashes: `HEAD`, `index`, `logs/HEAD`, `refs/heads/main`, `refs/heads/master`, `packed-refs`, `description`, `COMMIT_EDITMSG`, `ORIG_HEAD`, `/.gitignore` y el propio `/.git/`. Todas dieron **404** ([22-git-artefactos.txt](evidencia/22-git-artefactos.txt)). Sin `HEAD` ni refs no hay un hash de commit por donde empezar, así que **en este lab no se puede reconstruir el código ni la historia**. Lo que sí se filtró es el host de Git interno y el nombre del repositorio, que orientan un ataque a la infraestructura de desarrollo.
+
+Un detalle útil para el operador: el script `http-git` de nmap no detectó nada ([23-nmap-http-git.txt](evidencia/23-nmap-http-git.txt)) porque abandona si `/.git/HEAD` no responde 200 [B6]. Una herramienta automática dio negativo donde el pedido manual de `config` dio positivo; un resultado vacío de un escáner no prueba que el `.git` no esté expuesto.
+
+**Fuentes de la Parte B** (consultadas el 02/11/2026):
+
+- **[B1]** MITRE. [CWE-548 — Exposure of Information Through Directory Listing](https://cwe.mitre.org/data/definitions/548.html).
+- **[B2]** OWASP WSTG v4.2. [WSTG-CONF-04 — Review Old Backup and Unreferenced Files for Sensitive Information](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/04-Review_Old_Backup_and_Unreferenced_Files_for_Sensitive_Information/).
+- **[B3]** MITRE. [CWE-527 — Exposure of Version-Control Repository to an Unauthorized Control Sphere](https://cwe.mitre.org/data/definitions/527.html).
+- **[B4]** arthaud. [git-dumper](https://github.com/arthaud/git-dumper), sección "How does it work?".
+- **[B5]** Git. [gitrepository-layout](https://git-scm.com/docs/gitrepository-layout): `objects/`, `refs/`, `HEAD`, `index`, `logs/` y `packed-refs`.
+- **[B6]** Nmap. [Script NSE `http-git`](https://nmap.org/nsedoc/scripts/http-git.html); en su código: "If we can't get a valid /.git/HEAD, don't even bother continuing".
 
 **P3 — El método `PUT`.**
 
